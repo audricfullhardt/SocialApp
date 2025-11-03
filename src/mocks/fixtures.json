@@ -1,0 +1,54 @@
+{
+  "channels": [
+    { "id": 1, "name": "Général", "slug": "general" },
+    { "id": 2, "name": "Dev", "slug": "dev" }
+  ],
+  "publications": [
+    {
+      "id": 1,
+      "channelId": 1,
+      "auteur": {
+        "id": 1,
+        "displayName": "Alice",
+        "email": "alice@mail.com",
+        "avatar": "https://i.pravatar.cc/150?u=bob",
+        "createdAt": "2025-10-10T08:00:00Z"
+      },
+      "titre": "Bienvenue",
+      "body": "Premier message du channel !",
+      "createdAt": "2025-10-10T08:00:00Z",
+      "updatedAt": "2025-10-10T08:00:00Z"
+    },
+    {
+      "id": 2,
+      "channelId": 2,
+      "auteur": {
+        "id": 2,
+        "displayName": "Bob",
+        "email": "bob@mail.com",
+        "avatar": "https://i.pravatar.cc/150?u=alice",
+        "createdAt": "2025-10-10T09:00:00Z"
+      },
+      "titre": "Code review",
+      "body": "Quelqu’un pour relire mon composant React ?",
+      "createdAt": "2025-10-10T09:00:00Z",
+      "updatedAt": "2025-10-10T09:00:00Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "publicationId": 2,
+      "auteur": {
+        "id": 3,
+        "displayName": "Charlie",
+        "email": "charlie@mail.com",
+        "avatar": "https://i.pravatar.cc/150?u=charlie",
+        "createdAt": "2025-10-10T09:30:00Z"
+      },
+      "body": "Je regarde ça dans la journée !",
+      "createdAt": "2025-10-10T09:30:00Z",
+      "updatedAt": "2025-10-10T09:30:00Z"
+    }
+  ]
+}
