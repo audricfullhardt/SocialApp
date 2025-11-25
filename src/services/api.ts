@@ -10,10 +10,6 @@ function authHeader() {
   return { Authorization: `Bearer ${token}` };
 };
 
-function mockDelay<T>(data: T, delay = 300): Promise<T> {
-  return new Promise((res) => setTimeout(() => res(data), delay));
-};
-
 export async function login(email: string, password: string) {
   const res = await fetch(`${API_URL}/login`, {
     method: "POST",
@@ -43,9 +39,6 @@ export async function register(
 };
 
 export async function getChannels(): Promise<Channel[]> {
-  if (USE_MOCK) {
-    return mockDelay(fixtures.channels);
-  }
   const res = await fetch(`${API_URL}/${API_SLUG}/channels`, { headers: authHeader() });
   return res.json();
 }
@@ -53,12 +46,6 @@ export async function getChannels(): Promise<Channel[]> {
 export async function getPublicationsByChannel(
   slug: string
 ): Promise<Publication[]> {
-  if (USE_MOCK) {
-    const pubs = fixtures.publications.filter(
-      (pub) => pub.channelId === fixtures.channels.find((ch) => ch.slug === slug)?.id
-    );
-    return mockDelay(pubs);
-  }
   const res = await fetch(`${API_URL}/publications?channelSlug=${slug}`, {
     headers: authHeader(),
   });
