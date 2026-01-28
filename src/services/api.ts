@@ -72,7 +72,7 @@ function getAuthToken(): string | null {
  */
 function buildHeaders(includeAuth = true): HeadersInit {
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    "Content-Type": "application/ld+json", // API Platform utilise application/ld+json
   };
 
   if (includeAuth) {
@@ -212,10 +212,10 @@ export async function getChannels(): Promise<Channel[]> {
 }
 
 /**
- * Récupère un channel par son ID
+ * Récupère un channel par son slug
  */
-export async function getChannelById(channelId: number): Promise<Channel> {
-  return fetchAPI<Channel>(`/${API_SLUG}/channels/${channelId}`);
+export async function getChannelBySlug(channelSlug: string): Promise<Channel> {
+  return fetchAPI<Channel>(`/${API_SLUG}/channels/${channelSlug}`);
 }
 
 // ============================================================================
@@ -223,27 +223,27 @@ export async function getChannelById(channelId: number): Promise<Channel> {
 // ============================================================================
 
 /**
- * Récupère les publications d'un channel
+ * Récupère les publications d'un channel par son slug
  */
-export async function getPublicationsByChannel(channelId: number): Promise<Publication[]> {
-  const data = await fetchAPI<ApiPlatformCollection<Publication>>(
-    `/${API_SLUG}/channels/${channelId}/publications`
+export async function getPublicationsByChannel(channelSlug: string): Promise<Publication[]> {
+  const channel = await fetchAPI<Channel>(
+    `/${API_SLUG}/channels/${channelSlug}`
   );
-  return data.member || data["hydra:member"] || [];
+  return channel.publications || [];
 }
 
 /**
  * Crée une nouvelle publication
  */
 export async function createPublication(
-  channelId: number,
+  channelSlug: string,
   title: string,
   body: string
 ): Promise<Publication> {
   return fetchAPI<Publication>(`/${API_SLUG}/publications`, {
     method: "POST",
     body: JSON.stringify({
-      channel: `/api/${API_SLUG}/channels/${channelId}`, // IRI API Platform
+      channel: `/api/${API_SLUG}/channels/${channelSlug}`, // IRI API Platform
       title,
       body,
     }),
@@ -254,7 +254,7 @@ export async function createPublication(
  * Récupère une publication par son ID
  */
 export async function getPublicationById(publicationId: number): Promise<Publication> {
-  return fetchAPI<Publication>(`/${API_SLUG}/publications/${publicationId}`);
+  return fetchAPI<Publication>(`/${API_SLUG}/${publicationId}`);
 }
 
 // ============================================================================
@@ -293,15 +293,18 @@ export async function createComment(
 
 /**
  * Ajoute une réaction à une publication
+ * Endpoint: POST /publications/{id}/reactions
  */
 export async function addReactionToPublication(
-  publicationId: number,
+  publicationIri: string,
   type: "like" | "love"
 ): Promise<Reaction> {
-  return fetchAPI<Reaction>(`/${API_SLUG}/reactions`, {
+  // Extraire l'ID depuis l'IRI (ex: /api/ws-k/publications/11 -> 11)
+  const publicationId = publicationIri.split('/').pop();
+  
+  return fetchAPI<Reaction>(`/${API_SLUG}/messages/${publicationId}/reactions`, {
     method: "POST",
     body: JSON.stringify({
-      publication: `/api/${API_SLUG}/publications/${publicationId}`, // IRI API Platform
       type,
     }),
   });
@@ -309,15 +312,18 @@ export async function addReactionToPublication(
 
 /**
  * Ajoute une réaction à un commentaire
+ * Endpoint: POST /comments/{id}/reactions
  */
 export async function addReactionToComment(
-  commentId: number,
+  commentIri: string,
   type: "like" | "love"
 ): Promise<Reaction> {
-  return fetchAPI<Reaction>(`/${API_SLUG}/reactions`, {
+  // Extraire l'ID depuis l'IRI (ex: /api/ws-k/comments/5 -> 5)
+  const commentId = commentIri.split('/').pop();
+  
+  return fetchAPI<Reaction>(`/${API_SLUG}/comments/${commentId}/reactions`, {
     method: "POST",
     body: JSON.stringify({
-      comment: `/api/${API_SLUG}/comments/${commentId}`, // IRI API Platform
       type,
     }),
   });

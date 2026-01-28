@@ -5,7 +5,7 @@ import { getPublicationsByChannel } from "@/services/api";
 import { Publication } from "@/types";
 
 interface UsePublicationsOptions {
-  channelId: number | null;
+  channelSlug: string | null;
   pollingInterval?: number; // Intervalle de polling en ms (0 = désactivé)
 }
 
@@ -21,7 +21,7 @@ interface UsePublicationsReturn {
  * Supporte le polling automatique pour simuler le temps réel
  */
 export function usePublications({
-  channelId,
+  channelSlug,
   pollingInterval = 0,
 }: UsePublicationsOptions): UsePublicationsReturn {
   const [publications, setPublications] = useState<Publication[]>([]);
@@ -29,7 +29,7 @@ export function usePublications({
   const [error, setError] = useState<Error | null>(null);
 
   const fetchPublications = useCallback(async (isInitialLoad = false) => {
-    if (!channelId) {
+    if (!channelSlug) {
       setPublications([]);
       setLoading(false);
       return;
@@ -42,7 +42,7 @@ export function usePublications({
     setError(null);
 
     try {
-      const data = await getPublicationsByChannel(channelId);
+      const data = await getPublicationsByChannel(channelSlug);
       setPublications(data);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Erreur lors de la récupération des publications"));
@@ -50,24 +50,24 @@ export function usePublications({
     } finally {
       setLoading(false);
     }
-  }, [channelId]);
+  }, [channelSlug]);
 
   // Fetch initial
   useEffect(() => {
     fetchPublications(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channelId]);
+  }, [channelSlug]);
 
   // Polling (si activé)
   useEffect(() => {
-    if (pollingInterval <= 0 || !channelId) return;
+    if (pollingInterval <= 0 || !channelSlug) return;
 
     const intervalId = setInterval(() => {
       fetchPublications();
     }, pollingInterval);
 
     return () => clearInterval(intervalId);
-  }, [pollingInterval, channelId, fetchPublications]);
+  }, [pollingInterval, channelSlug, fetchPublications]);
 
   return {
     publications,

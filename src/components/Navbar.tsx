@@ -54,16 +54,13 @@ export default function Navbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Link href="/channels">Channels</Link>
+        {isLogin && <Link href="/channels">Channels</Link>}
 
         {isLogin ? (
           <>
             <Link href="/profile">
               <User />
             </Link>
-            <Button size="sm" variant="outline" onClick={logout}>
-              Logout
-            </Button>
           </>
         ) : (
           <Link href="/login">

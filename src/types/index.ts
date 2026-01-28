@@ -20,15 +20,17 @@ export interface Channel {
   id: number;
   name: string;
   slug: string;
-  publications?: string[];
+  publications?: Publication[];
   workspace?: string[];
 }
 
 export interface Publication {
-  channelSlug: string;
-  id: number;
-  auteur: Member;
-  channel: Channel;
+  "@id": string; // IRI de la publication (ex: /api/ws-k/publications/11)
+  "@type"?: string;
+  id?: number; // ID numérique (peut ne pas être retourné par l'API)
+  author?: string | Member; // Peut être un IRI (string) ou un objet Member
+  auteur?: Member; // Alias pour author
+  channel?: Channel | string; // Peut être un objet Channel ou un IRI (string)
   title: string;
   body: string;
   createdAt: string;

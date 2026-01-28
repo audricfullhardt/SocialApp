@@ -17,12 +17,12 @@ const POLLING_INTERVAL = 5000; // 5 secondes
 
 export default function ChannelPage() {
   const params = useParams();
-  const channelId = params.slug ? parseInt(params.slug.toString(), 10) : null;
+  const channelSlug = params.slug ? params.slug.toString() : null;
   const toast = useToast();
 
   // Hooks
   const { publications, loading, error, refetch } = usePublications({
-    channelId,
+    channelSlug,
     pollingInterval: POLLING_INTERVAL,
   });
 
@@ -37,7 +37,7 @@ export default function ChannelPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!channelId) return;
+    if (!channelSlug) return;
     if (!title.trim() || !body.trim()) {
       toast.warning("Le titre et le contenu sont requis");
       return;
@@ -46,7 +46,7 @@ export default function ChannelPage() {
     setIsSubmitting(true);
 
     try {
-      await createPublication(channelId, title.trim(), body.trim());
+      await createPublication(channelSlug, title.trim(), body.trim());
       
       // Réinitialiser le formulaire
       setTitle("");
@@ -69,8 +69,8 @@ export default function ChannelPage() {
     }
   };
 
-  // Gestion du cas où l'ID n'est pas valide
-  if (!channelId) {
+  // Gestion du cas où le slug n'est pas valide
+  if (!channelSlug) {
     return (
       <div className="p-6">
         <Alert variant="destructive">
@@ -128,7 +128,9 @@ export default function ChannelPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold">
-            {publications[0]?.channel?.name || `Channel #${channelId}`}
+            {(publications[0]?.channel && typeof publications[0].channel === 'object' 
+              ? publications[0].channel.name 
+              : null) || `Channel #${channelSlug}`}
           </h1>
           <p className="text-sm text-muted-foreground">
             {publications.length} publication{publications.length !== 1 ? "s" : ""}
@@ -136,8 +138,25 @@ export default function ChannelPage() {
         </div>
       </div>
 
-      {/* Formulaire de création */}
-      <Card className="p-4 mb-6">
+      {/* Liste des publications (ordre croissant - plus anciennes en haut) */}
+      {publications.length === 0 ? (
+        <Alert className="mb-6">
+          <p className="text-muted-foreground">
+            Aucune publication dans ce channel. Soyez le premier à publier !
+          </p>
+        </Alert>
+      ) : (
+        <div className="flex flex-col gap-4 mb-6" data-testid="publications-list">
+          {publications
+            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+            .map((publication) => (
+              <PublicationCard key={publication["@id"]} publication={publication} />
+            ))}
+        </div>
+      )}
+
+      {/* Formulaire de création (en dessous des publications) */}
+      <Card className="p-4">
         <h2 className="text-lg font-semibold mb-4">Nouvelle publication</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="create-publication-form">
           <Input
@@ -183,23 +202,6 @@ export default function ChannelPage() {
           </Button>
         </form>
       </Card>
-
-      {/* Liste des publications */}
-      {publications.length === 0 ? (
-        <Alert>
-          <p className="text-muted-foreground">
-            Aucune publication dans ce channel. Soyez le premier à publier !
-          </p>
-        </Alert>
-      ) : (
-        <div className="flex flex-col gap-4" data-testid="publications-list">
-          {publications
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .map((publication) => (
-              <PublicationCard key={publication.id} publication={publication} />
-            ))}
-        </div>
-      )}
     </div>
   );
 }

@@ -24,14 +24,22 @@ export default function PublicationCard({
   const [isAddingReaction, setIsAddingReaction] = useState(false);
   const toast = useToast();
 
+  // Récupère l'auteur (peut être dans author ou auteur, et peut être un objet ou une string IRI)
+  const author = typeof publication.author === 'object' ? publication.author : publication.auteur;
+
   /**
    * Ajoute une réaction à la publication
    */
   const handleAddReaction = async (type: "like" | "love") => {
+    if (!publication["@id"]) {
+      toast.error("Impossible d'ajouter une réaction : publication invalide");
+      return;
+    }
+
     setIsAddingReaction(true);
 
     try {
-      await addReactionToPublication(publication.id, type);
+      await addReactionToPublication(publication["@id"], type);
       
       // Afficher un message de succès
       toast.success(`Réaction ${type === "like" ? "👍" : "❤️"} ajoutée !`);
@@ -90,25 +98,25 @@ export default function PublicationCard({
   return (
     <Card 
       className="p-4 hover:bg-accent/50 transition-colors" 
-      data-testid={`publication-${publication.id}`}
+      data-testid={`publication-${publication["@id"]}`}
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-3">
         <Avatar>
           <AvatarImage 
-            src={publication.auteur?.avatar} 
-            alt={publication.auteur?.displayName || "Utilisateur"} 
+            src={author?.avatar} 
+            alt={author?.displayName || "Utilisateur"} 
           />
           <AvatarFallback>
-            {publication.auteur?.displayName 
-              ? getInitials(publication.auteur.displayName)
+            {author?.displayName 
+              ? getInitials(author.displayName)
               : "??"}
           </AvatarFallback>
         </Avatar>
 
         <div className="flex-1 min-w-0">
           <p className="font-semibold truncate">
-            {publication.auteur?.displayName || "Utilisateur inconnu"}
+            {author?.displayName || "Utilisateur inconnu"}
           </p>
           <p className="text-sm text-muted-foreground" title={new Date(publication.createdAt).toLocaleString("fr-FR")}>
             {formatDate(publication.createdAt)}
@@ -131,7 +139,7 @@ export default function PublicationCard({
           disabled={isAddingReaction}
           className="gap-1"
           aria-label="Aimer"
-          data-testid={`reaction-like-${publication.id}`}
+          data-testid={`reaction-like-${publication["@id"]}`}
         >
           <ThumbsUp className="w-4 h-4" />
           <span className="text-xs">Like</span>
@@ -144,7 +152,7 @@ export default function PublicationCard({
           disabled={isAddingReaction}
           className="gap-1"
           aria-label="Adorer"
-          data-testid={`reaction-love-${publication.id}`}
+          data-testid={`reaction-love-${publication["@id"]}`}
         >
           <Heart className="w-4 h-4" />
           <span className="text-xs">Love</span>

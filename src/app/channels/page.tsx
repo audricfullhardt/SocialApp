@@ -51,7 +51,7 @@ export default function ChannelsPage() {
         {channels.map((channel) => (
           <Link
             key={channel.id}
-            href={`/channels/${channel.id}`}
+            href={`/channels/${channel.slug}`}
             data-testid={`channel-card-${channel.id}`}
           >
             <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer">

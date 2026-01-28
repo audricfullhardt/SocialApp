@@ -46,11 +46,6 @@ export default function Home() {
               <Link href="/login">
                 <Button size="lg">Se connecter</Button>
               </Link>
-              <Link href="/channels">
-                <Button size="lg" variant="outline">
-                  Explorer
-                </Button>
-              </Link>
             </div>
           )}
         </div>
