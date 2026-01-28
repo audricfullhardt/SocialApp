@@ -1,3 +1,13 @@
+export interface ApiPlatformCollection<T> {
+  "@context": string;
+  "@id": string;
+  "@type": string;
+  member?: T[];
+  "hydra:member"?: T[]; // API Platform utilise parfois hydra:member
+  totalItems?: number;
+  "hydra:totalItems"?: number;
+}
+
 export interface Member {
   id: number;
   displayName: string;
@@ -10,6 +20,8 @@ export interface Channel {
   id: number;
   name: string;
   slug: string;
+  publications?: string[];
+  workspace?: string[];
 }
 
 export interface Publication {
@@ -17,7 +29,7 @@ export interface Publication {
   id: number;
   auteur: Member;
   channel: Channel;
-  titre: string;
+  title: string;
   body: string;
   createdAt: string;
   updatedAt: string;

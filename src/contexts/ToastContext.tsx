@@ -1,0 +1,134 @@
+"use client";
+
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export type ToastType = "success" | "error" | "info" | "warning";
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+  duration?: number;
+}
+
+interface ToastContextType {
+  toasts: Toast[];
+  addToast: (message: string, type?: ToastType, duration?: number) => void;
+  removeToast: (id: string) => void;
+  success: (message: string, duration?: number) => void;
+  error: (message: string, duration?: number) => void;
+  info: (message: string, duration?: number) => void;
+  warning: (message: string, duration?: number) => void;
+}
+
+interface ToastProviderProps {
+  children: ReactNode;
+}
+
+// ============================================================================
+// Context
+// ============================================================================
+
+const ToastContext = createContext<ToastContextType | null>(null);
+
+// ============================================================================
+// Provider
+// ============================================================================
+
+export function ToastProvider({ children }: ToastProviderProps) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  /**
+   * Supprime un toast
+   */
+  const removeToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  }, []);
+
+  /**
+   * Ajoute un nouveau toast
+   */
+  const addToast = useCallback(
+    (message: string, type: ToastType = "info", duration: number = 5000) => {
+      const id = Math.random().toString(36).substring(2, 9);
+
+      const newToast: Toast = {
+        id,
+        message,
+        type,
+        duration,
+      };
+
+      setToasts((prev) => [...prev, newToast]);
+
+      // Supprimer automatiquement après la durée spécifiée
+      if (duration > 0) {
+        setTimeout(() => {
+          removeToast(id);
+        }, duration);
+      }
+    },
+    [removeToast]
+  );
+
+  /**
+   * Raccourcis pour les différents types de toasts
+   */
+  const success = useCallback(
+    (message: string, duration?: number) => addToast(message, "success", duration),
+    [addToast]
+  );
+
+  const error = useCallback(
+    (message: string, duration?: number) => addToast(message, "error", duration),
+    [addToast]
+  );
+
+  const info = useCallback(
+    (message: string, duration?: number) => addToast(message, "info", duration),
+    [addToast]
+  );
+
+  const warning = useCallback(
+    (message: string, duration?: number) => addToast(message, "warning", duration),
+    [addToast]
+  );
+
+  const value: ToastContextType = {
+    toasts,
+    addToast,
+    removeToast,
+    success,
+    error,
+    info,
+    warning,
+  };
+
+  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+}
+
+// ============================================================================
+// Hook
+// ============================================================================
+
+/**
+ * Hook pour accéder au contexte de toast
+ * @throws Error si utilisé en dehors d'un ToastProvider
+ */
+export function useToast(): ToastContextType {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
+  return context;
+}

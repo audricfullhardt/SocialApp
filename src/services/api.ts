@@ -1,62 +1,333 @@
-import { Channel, Publication, Comment } from "../types";
-import fixtures from "../mocks/fixtures.json";
+import {
+  Channel,
+  Publication,
+  Comment,
+  ApiPlatformCollection,
+  Member,
+  Reaction,
+} from "../types";
+
+// ============================================================================
+// Configuration
+// ============================================================================
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === "true";
 const API_SLUG = process.env.NEXT_PUBLIC_API_SLUG;
 
-function authHeader() {
-  const token = localStorage.getItem("token");
-  return { Authorization: `Bearer ${token}` };
-};
+if (!API_URL || !API_SLUG) {
+  throw new Error("API_URL and API_SLUG must be defined in environment variables");
+}
 
-export async function login(email: string, password: string) {
-  const res = await fetch(`${API_URL}/login`, {
+// ============================================================================
+// Custom Errors
+// ============================================================================
+
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    public statusText: string,
+    message: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+export class UnauthorizedError extends ApiError {
+  constructor(message = "Non autorisé - veuillez vous reconnecter") {
+    super(401, "Unauthorized", message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class ForbiddenError extends ApiError {
+  constructor(message = "Accès interdit") {
+    super(403, "Forbidden", message);
+    this.name = "ForbiddenError";
+  }
+}
+
+export class NotFoundError extends ApiError {
+  constructor(message = "Ressource non trouvée") {
+    super(404, "Not Found", message);
+    this.name = "NotFoundError";
+  }
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Récupère le token d'authentification depuis le localStorage
+ * Note: Cette fonction est temporaire et sera remplacée par une solution cookie
+ */
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("token");
+}
+
+/**
+ * Construit les headers pour les requêtes authentifiées
+ */
+function buildHeaders(includeAuth = true): HeadersInit {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (includeAuth) {
+    const token = getAuthToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
+  return headers;
+}
+
+/**
+ * Wrapper autour de fetch avec gestion d'erreurs robuste
+ */
+async function fetchAPI<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = endpoint.startsWith("http") ? endpoint : `${API_URL}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...buildHeaders(!endpoint.includes("/login") && !endpoint.includes("/register")),
+        ...options.headers,
+      },
+    });
+
+    // Gestion des erreurs HTTP
+    if (!response.ok) {
+      let errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+
+      // Tenter de parser le corps de la réponse pour un message d'erreur détaillé
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch {
+        // Si le parsing JSON échoue, on garde le message par défaut
+      }
+
+      // Lancer des erreurs spécifiques selon le code de statut
+      switch (response.status) {
+        case 401:
+          throw new UnauthorizedError(errorMessage);
+        case 403:
+          throw new ForbiddenError(errorMessage);
+        case 404:
+          throw new NotFoundError(errorMessage);
+        default:
+          throw new ApiError(response.status, response.statusText, errorMessage);
+      }
+    }
+
+    // Parser la réponse JSON
+    return await response.json();
+  } catch (error) {
+    // Re-lancer les erreurs ApiError
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    // Gérer les erreurs réseau
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new ApiError(0, "Network Error", "Erreur réseau - impossible de joindre l'API");
+    }
+
+    // Erreur inconnue
+    throw new ApiError(500, "Unknown Error", "Une erreur inattendue s'est produite");
+  }
+}
+
+// ============================================================================
+// Authentication
+// ============================================================================
+
+export interface LoginResponse {
+  token: string;
+}
+
+export interface RegisterResponse {
+  id: number;
+  email: string;
+  displayName: string;
+}
+
+/**
+ * Authentifie un utilisateur
+ */
+export async function login(email: string, password: string): Promise<LoginResponse> {
+  const data = await fetchAPI<LoginResponse>("/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
-  const data = await res.json();
-  if (res.ok && data.token) {
+
+  // Stocker le token (temporaire - à remplacer par cookie)
+  if (typeof window !== "undefined" && data.token) {
     localStorage.setItem("token", data.token);
   }
+
   return data;
-};
+}
 
-
+/**
+ * Enregistre un nouvel utilisateur
+ */
 export async function register(
   name: string,
   email: string,
   password: string,
   code: string
-) {
-  const res = await fetch(`${API_URL}/register`, {
+): Promise<RegisterResponse> {
+  return fetchAPI<RegisterResponse>("/register", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email, password, code }),
   });
-  return res.json();
-};
+}
 
+/**
+ * Récupère les informations de l'utilisateur connecté
+ */
+export async function getCurrentUser(): Promise<Member> {
+  return fetchAPI<Member>(`/${API_SLUG}/users/me`);
+}
+
+// ============================================================================
+// Channels
+// ============================================================================
+
+/**
+ * Récupère la liste de tous les channels
+ */
 export async function getChannels(): Promise<Channel[]> {
-  const res = await fetch(`${API_URL}/${API_SLUG}/channels`, { headers: authHeader() });
-  return res.json();
+  const data = await fetchAPI<ApiPlatformCollection<Channel>>(`/${API_SLUG}/channels`);
+  return data.member || data["hydra:member"] || [];
 }
 
-export async function getPublicationsByChannel(
-  slug: string
-): Promise<Publication[]> {
-  const res = await fetch(`${API_URL}/publications?channelSlug=${slug}`, {
-    headers: authHeader(),
-  });
-  return res.json();
+/**
+ * Récupère un channel par son ID
+ */
+export async function getChannelById(channelId: number): Promise<Channel> {
+  return fetchAPI<Channel>(`/${API_SLUG}/channels/${channelId}`);
 }
 
-export async function getCommentsByPublication(
-  pubId: number
-): Promise<Comment[]> {
-  const res = await fetch(`${API_URL}/comments?publicationId=${pubId}`, {
-    headers: authHeader(),
+// ============================================================================
+// Publications
+// ============================================================================
+
+/**
+ * Récupère les publications d'un channel
+ */
+export async function getPublicationsByChannel(channelId: number): Promise<Publication[]> {
+  const data = await fetchAPI<ApiPlatformCollection<Publication>>(
+    `/${API_SLUG}/channels/${channelId}/publications`
+  );
+  return data.member || data["hydra:member"] || [];
+}
+
+/**
+ * Crée une nouvelle publication
+ */
+export async function createPublication(
+  channelId: number,
+  title: string,
+  body: string
+): Promise<Publication> {
+  return fetchAPI<Publication>(`/${API_SLUG}/publications`, {
+    method: "POST",
+    body: JSON.stringify({
+      channel: `/api/${API_SLUG}/channels/${channelId}`, // IRI API Platform
+      title,
+      body,
+    }),
   });
-  return res.json();
+}
+
+/**
+ * Récupère une publication par son ID
+ */
+export async function getPublicationById(publicationId: number): Promise<Publication> {
+  return fetchAPI<Publication>(`/${API_SLUG}/publications/${publicationId}`);
+}
+
+// ============================================================================
+// Comments
+// ============================================================================
+
+/**
+ * Récupère les commentaires d'une publication
+ */
+export async function getCommentsByPublication(publicationId: number): Promise<Comment[]> {
+  const data = await fetchAPI<ApiPlatformCollection<Comment>>(
+    `/${API_SLUG}/publications/${publicationId}/comments`
+  );
+  return data.member || data["hydra:member"] || [];
+}
+
+/**
+ * Crée un nouveau commentaire
+ */
+export async function createComment(
+  publicationId: number,
+  body: string
+): Promise<Comment> {
+  return fetchAPI<Comment>(`/${API_SLUG}/comments`, {
+    method: "POST",
+    body: JSON.stringify({
+      publication: `/api/${API_SLUG}/publications/${publicationId}`, // IRI API Platform
+      body,
+    }),
+  });
+}
+
+// ============================================================================
+// Reactions
+// ============================================================================
+
+/**
+ * Ajoute une réaction à une publication
+ */
+export async function addReactionToPublication(
+  publicationId: number,
+  type: "like" | "love"
+): Promise<Reaction> {
+  return fetchAPI<Reaction>(`/${API_SLUG}/reactions`, {
+    method: "POST",
+    body: JSON.stringify({
+      publication: `/api/${API_SLUG}/publications/${publicationId}`, // IRI API Platform
+      type,
+    }),
+  });
+}
+
+/**
+ * Ajoute une réaction à un commentaire
+ */
+export async function addReactionToComment(
+  commentId: number,
+  type: "like" | "love"
+): Promise<Reaction> {
+  return fetchAPI<Reaction>(`/${API_SLUG}/reactions`, {
+    method: "POST",
+    body: JSON.stringify({
+      comment: `/api/${API_SLUG}/comments/${commentId}`, // IRI API Platform
+      type,
+    }),
+  });
+}
+
+/**
+ * Supprime une réaction
+ */
+export async function deleteReaction(reactionId: number): Promise<void> {
+  return fetchAPI<void>(`/${API_SLUG}/reactions/${reactionId}`, {
+    method: "DELETE",
+  });
 }
