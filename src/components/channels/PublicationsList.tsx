@@ -39,11 +39,9 @@ export function PublicationsList({
 
   if (publications.length === 0) {
     return (
-      <Alert>
         <p className="text-muted-foreground">
           Aucune publication dans ce channel. Soyez le premier à publier !
         </p>
-      </Alert>
     );
   }
 

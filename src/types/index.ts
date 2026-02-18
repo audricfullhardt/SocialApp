@@ -24,33 +24,55 @@ export interface Channel {
   workspace?: string[];
 }
 
-export interface Publication {
-  "@id": string; // IRI de la publication (ex: /api/ws-k/publications/11)
+export interface Media {
+  "@context"?: string;
+  "@id"?: string;
   "@type"?: string;
-  id?: number; // ID numérique (peut ne pas être retourné par l'API)
-  author?: string | Member; // Peut être un IRI (string) ou un objet Member
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+}
+
+export interface Reaction {
+  "@context"?: string;
+  "@id"?: string;
+  "@type"?: string;
+  id: number;
+  type: string;
+  author: string | Member;
+  createdAt: string;
+}
+
+export interface Comment {
+  "@context"?: string;
+  "@id"?: string;
+  "@type"?: string;
+  id: number;
+  publication?: string;
+  author: string | Member;
   auteur?: Member; // Alias pour author
-  channel?: Channel | string; // Peut être un objet Channel ou un IRI (string)
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  reactions?: Reaction[];
+  media?: Media[];
+}
+
+export interface Publication {
+  "@context"?: string;
+  "@id": string;
+  "@type"?: string;
+  id?: number;
+  workspace?: Record<string, unknown>;
+  author?: string | Member;
+  auteur?: Member; // Alias pour author
+  channel?: Channel | string;
   title: string;
   body: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface Comment {
-  id: number;
-  auteur: Member;
-  publication: Publication;
-  body: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Reaction {
-  id: number;
-  type: "like" | "love";
-  auteur: Member;
-  publication?: Publication;
-  comment?: Comment;
-  createdAt: string;
+  comments?: Comment[];
+  reactions?: Reaction[];
+  media?: Media[];
 }

@@ -27,6 +27,16 @@ export default function PublicationCard({
   // Récupère l'auteur (peut être dans author ou auteur, et peut être un objet ou une string IRI)
   const author = typeof publication.author === 'object' ? publication.author : publication.auteur;
 
+  // Vérifie si l'utilisateur a déjà "loved" cette publication
+  const isLoved = publication.reactions?.some(
+    (reaction) => reaction.type === "love"
+  );
+
+  // Vérifie si l'utilisateur a déjà "liked" cette publication
+  const isLiked = publication.reactions?.some(
+    (reaction) => reaction.type === "like"
+  );
+
   /**
    * Ajoute une réaction à la publication
    */
@@ -141,7 +151,10 @@ export default function PublicationCard({
           aria-label="Aimer"
           data-testid={`reaction-like-${publication["@id"]}`}
         >
-          <ThumbsUp className="w-4 h-4" />
+          <ThumbsUp 
+            className="w-4 h-4" 
+            fill={isLiked ? "currentColor" : "none"}
+          />
           <span className="text-xs">Like</span>
         </Button>
 
@@ -154,7 +167,11 @@ export default function PublicationCard({
           aria-label="Adorer"
           data-testid={`reaction-love-${publication["@id"]}`}
         >
-          <Heart className="w-4 h-4" />
+          <Heart 
+            className="w-4 h-4" 
+            fill={isLoved ? "red" : "none"}
+            color={isLoved ? "red" : "currentColor"}
+          />
           <span className="text-xs">Love</span>
         </Button>
 

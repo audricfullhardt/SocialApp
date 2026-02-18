@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useChannels, usePublications } from "@/hooks";
 import { useToast } from "@/contexts/ToastContext";
-import { createPublication } from "@/services/api";
+import { createPublication, createChannel } from "@/services/api";
 
 const POLLING_INTERVAL = 5000;
 
 export function useChannelsPage() {
-  const { channels, loading: loadingChannels, error: errorChannels } = useChannels();
+  const { channels, loading: loadingChannels, error: errorChannels, refetch: refetchChannels } = useChannels();
   const [selectedChannelSlug, setSelectedChannelSlug] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingChannel, setIsCreatingChannel] = useState(false);
   const toast = useToast();
 
   const {
@@ -52,6 +53,27 @@ export function useChannelsPage() {
     }
   };
 
+  const handleCreateChannel = async (name: string, slug: string) => {
+    setIsCreatingChannel(true);
+
+    try {
+      const newChannel = await createChannel(name, slug);
+      toast.success(`Channel "${name}" créé avec succès !`);
+      await refetchChannels();
+      setSelectedChannelSlug(newChannel.slug);
+    } catch (err) {
+      console.error("Erreur lors de la création du channel:", err);
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de la création du channel"
+      );
+      throw err;
+    } finally {
+      setIsCreatingChannel(false);
+    }
+  };
+
   return {
     channels,
     selectedChannel,
@@ -62,7 +84,9 @@ export function useChannelsPage() {
     errorChannels,
     errorPublications,
     isSubmitting,
+    isCreatingChannel,
     handleChannelSelect,
     handleSubmitPublication,
+    handleCreateChannel,
   };
 }

@@ -212,6 +212,16 @@ export async function getChannels(): Promise<Channel[]> {
 }
 
 /**
+ * Crée un nouveau channel
+ */
+export async function createChannel(name: string, slug: string): Promise<Channel> {
+  return fetchAPI<Channel>(`/${API_SLUG}/channels`, {
+    method: "POST",
+    body: JSON.stringify({ name, slug }),
+  });
+}
+
+/**
  * Récupère un channel par son slug
  */
 export async function getChannelBySlug(channelSlug: string): Promise<Channel> {
@@ -299,13 +309,11 @@ export async function addReactionToPublication(
   publicationIri: string,
   type: "like" | "love"
 ): Promise<Reaction> {
-  // Extraire l'ID depuis l'IRI (ex: /api/ws-k/publications/11 -> 11)
-  const publicationId = publicationIri.split('/').pop();
-  
-  return fetchAPI<Reaction>(`/${API_SLUG}/messages/${publicationId}/reactions`, {
+  return fetchAPI<Reaction>(`/${API_SLUG}/reactions`, {
     method: "POST",
     body: JSON.stringify({
       type,
+      publication: publicationIri,
     }),
   });
 }

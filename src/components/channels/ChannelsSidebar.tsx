@@ -2,6 +2,7 @@ import { Channel } from "@/types";
 import { Badge, Skeleton } from "antd";
 import { Hash } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import { CreateChannelForm } from "./CreateChannelForm";
 
 interface ChannelsSidebarProps {
   channels: Channel[];
@@ -9,6 +10,8 @@ interface ChannelsSidebarProps {
   onChannelSelect: (slug: string) => void;
   loadingChannels: boolean;
   errorChannels?: Error | null;
+  onCreateChannel: (name: string, slug: string) => Promise<void>;
+  isCreatingChannel: boolean;
 }
 
 export function ChannelsSidebar({
@@ -17,10 +20,12 @@ export function ChannelsSidebar({
   onChannelSelect,
   loadingChannels,
   errorChannels,
+  onCreateChannel,
+  isCreatingChannel,
 }: ChannelsSidebarProps) {
   return (
-    <aside className="w-64 border-r bg-muted/10 overflow-y-auto">
-      <div className="p-4">
+    <aside className="w-64 border-r bg-muted/10 overflow-y-auto flex flex-col">
+      <div className="p-4 flex-1">
         <h2 className="text-lg font-bold mb-4">Channels</h2>
         <nav className="flex flex-col gap-1">
           {loadingChannels ? (
@@ -47,6 +52,13 @@ export function ChannelsSidebar({
             ))
           )}
         </nav>
+      </div>
+      
+      <div className="p-4 border-t bg-background">
+        <CreateChannelForm 
+          onSubmit={onCreateChannel} 
+          isSubmitting={isCreatingChannel}
+        />
       </div>
     </aside>
   );
