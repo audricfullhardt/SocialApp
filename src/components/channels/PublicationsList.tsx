@@ -1,7 +1,11 @@
-import { Publication } from "@/types";
+"use client";
+
+import { Publication, Reaction, ApiPlatformCollection } from "@/types";
 import PublicationCard from "@/components/Publication";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "antd";
+import { getReactions } from "@/services/api";
+import { useEffect, useState, useMemo } from "react";
 
 interface PublicationsListProps {
   publications: Publication[];
@@ -14,6 +18,47 @@ export function PublicationsList({
   loading,
   error,
 }: PublicationsListProps) {
+  const [reactions, setReactions] = useState<any>(null);
+  const [loadingReactions, setLoadingReactions] = useState(true);
+  
+  const fetchReactions = async () => {
+    try {
+      const data = await getReactions();
+      setReactions(data as ApiPlatformCollection<Reaction>);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des réactions:", err);
+    } finally {
+      setLoadingReactions(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchReactions();
+  }, []);
+  
+  const handleReactionAdded = () => {
+    fetchReactions();
+  };
+  
+  const publicationReactionsMap = useMemo(() => {
+    const map = new Map<string, "like" | "love" | null>();
+    
+    const reactionsData = reactions as ApiPlatformCollection<Reaction> | null;
+    if (!reactionsData?.member) return map;
+    
+    const sortedReactions = [...reactionsData.member].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    
+    sortedReactions.forEach((reaction) => {
+      const pubId = reaction.publication;
+      if (pubId && !map.has(pubId)) {
+        map.set(pubId, reaction.type as "like" | "love");
+      }
+    });
+    
+    return map;
+  }, [reactions]);
   if (error) {
     return (
       <Alert variant="destructive" data-testid="channel-error">
@@ -55,9 +100,18 @@ export function PublicationsList({
       className="flex flex-col gap-4 max-w-4xl mx-auto"
       data-testid="publications-list"
     >
-      {sortedPublications.map((publication) => (
-        <PublicationCard key={publication["@id"]} publication={publication} />
-      ))}
+      {sortedPublications.map((publication) => {
+        const lastReactionType = publicationReactionsMap.get(publication["@id"]);
+        return (
+          <PublicationCard 
+            key={publication["@id"]} 
+            publication={publication}
+            isLiked={lastReactionType === "like"}
+            isLoved={lastReactionType === "love"}
+            onReactionAdded={handleReactionAdded}
+          />
+        );
+      })}
     </div>
   );
 }

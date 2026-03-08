@@ -345,3 +345,8 @@ export async function deleteReaction(reactionId: number): Promise<void> {
     method: "DELETE",
   });
 }
+
+
+export async function getReactions(){
+  return fetchAPI<Reaction>(`/${API_SLUG}/reactions`);
+}

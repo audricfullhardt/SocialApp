@@ -88,7 +88,7 @@ function ChannelItem({ channel, isSelected, onSelect }: ChannelItemProps) {
         <span className="truncate font-medium">{channel.name}</span>
       </div>
       {publicationsCount > 0 && (
-        <Badge count={publicationsCount} size="small" className="ml-2" />
+        <Badge count={publicationsCount} size="small" className="ml-2" color="grey"/>
       )}
     </button>
   );

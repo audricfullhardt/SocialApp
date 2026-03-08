@@ -42,6 +42,7 @@ export interface Reaction {
   type: string;
   author: string | Member;
   createdAt: string;
+  publication?: string;
 }
 
 export interface Comment {

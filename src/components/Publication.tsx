@@ -12,34 +12,21 @@ import { Heart, ThumbsUp, MessageCircle } from "lucide-react";
 interface PublicationCardProps {
   publication: PublicationType;
   onReactionAdded?: () => void;
+  isLiked?: boolean;
+  isLoved?: boolean;
 }
 
-/**
- * Composant pour afficher une publication
- */
 export default function PublicationCard({ 
   publication, 
-  onReactionAdded 
+  onReactionAdded,
+  isLiked = false,
+  isLoved = false
 }: PublicationCardProps) {
   const [isAddingReaction, setIsAddingReaction] = useState(false);
   const toast = useToast();
 
-  // Récupère l'auteur (peut être dans author ou auteur, et peut être un objet ou une string IRI)
   const author = typeof publication.author === 'object' ? publication.author : publication.auteur;
 
-  // Vérifie si l'utilisateur a déjà "loved" cette publication
-  const isLoved = publication.reactions?.some(
-    (reaction) => reaction.type === "love"
-  );
-
-  // Vérifie si l'utilisateur a déjà "liked" cette publication
-  const isLiked = publication.reactions?.some(
-    (reaction) => reaction.type === "like"
-  );
-
-  /**
-   * Ajoute une réaction à la publication
-   */
   const handleAddReaction = async (type: "like" | "love") => {
     if (!publication["@id"]) {
       toast.error("Impossible d'ajouter une réaction : publication invalide");
@@ -51,10 +38,10 @@ export default function PublicationCard({
     try {
       await addReactionToPublication(publication["@id"], type);
       
-      // Afficher un message de succès
       toast.success(`Réaction ${type === "like" ? "👍" : "❤️"} ajoutée !`);
-      
-      // Notifier le parent pour rafraîchir les données si nécessaire
+
+
+
       if (onReactionAdded) {
         onReactionAdded();
       }
@@ -70,9 +57,6 @@ export default function PublicationCard({
     }
   };
 
-  /**
-   * Formate la date de manière relative ou absolue
-   */
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -93,9 +77,6 @@ export default function PublicationCard({
     });
   };
 
-  /**
-   * Génère les initiales pour l'avatar fallback
-   */
   const getInitials = (name: string): string => {
     return name
       .split(" ")
@@ -109,8 +90,7 @@ export default function PublicationCard({
     <Card 
       className="p-4 hover:bg-accent/50 transition-colors" 
       data-testid={`publication-${publication["@id"]}`}
-    >
-      {/* Header */}
+    > 
       <div className="flex items-center gap-3 mb-3">
         <Avatar>
           <AvatarImage 
@@ -134,13 +114,11 @@ export default function PublicationCard({
         </div>
       </div>
 
-      {/* Contenu */}
       <div className="mb-3">
         <h2 className="font-bold text-lg mb-2">{publication.title}</h2>
         <p className="text-sm whitespace-pre-wrap break-words">{publication.body}</p>
       </div>
 
-      {/* Actions & Réactions */}
       <div className="flex items-center gap-2 pt-3 border-t">
         <Button
           variant="ghost"
@@ -154,6 +132,7 @@ export default function PublicationCard({
           <ThumbsUp 
             className="w-4 h-4" 
             fill={isLiked ? "currentColor" : "none"}
+            color={isLiked ? "currentColor" : "currentColor"}
           />
           <span className="text-xs">Like</span>
         </Button>
