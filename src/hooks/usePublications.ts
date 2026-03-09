@@ -6,7 +6,7 @@ import { Publication } from "@/types";
 
 interface UsePublicationsOptions {
   channelSlug: string | null;
-  pollingInterval?: number; // Intervalle de polling en ms (0 = désactivé)
+  pollingInterval?: number;
 }
 
 interface UsePublicationsReturn {
@@ -16,10 +16,6 @@ interface UsePublicationsReturn {
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook pour récupérer et gérer les publications d'un channel
- * Supporte le polling automatique pour simuler le temps réel
- */
 export function usePublications({
   channelSlug,
   pollingInterval = 0,
@@ -35,7 +31,6 @@ export function usePublications({
       return;
     }
 
-    // Ne pas afficher le loader lors du polling (pour éviter les clignotements)
     if (isInitialLoad) {
       setLoading(true);
     }
@@ -52,13 +47,10 @@ export function usePublications({
     }
   }, [channelSlug]);
 
-  // Fetch initial
   useEffect(() => {
     fetchPublications(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelSlug]);
 
-  // Polling (si activé)
   useEffect(() => {
     if (pollingInterval <= 0 || !channelSlug) return;
 

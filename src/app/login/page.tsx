@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert } from "@/components/ui/alert";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -88,6 +89,12 @@ export default function LoginPage() {
         >
           {loading ? "Connexion..." : "Se connecter"}
         </Button>
+
+        <Link href="/register">
+          <Button variant="link" size="sm">
+            Pas encore de compte ? Inscrivez-vous
+          </Button>
+        </Link>
       </form>
     </div>
   );

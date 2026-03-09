@@ -11,9 +11,6 @@ interface UseChannelsReturn {
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook pour récupérer et gérer la liste des channels
- */
 export function useChannels(): UseChannelsReturn {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

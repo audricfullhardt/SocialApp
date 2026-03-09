@@ -11,13 +11,8 @@ interface ErrorProps {
   reset: () => void;
 }
 
-/**
- * Error UI pour la page channel détail
- * Affiché automatiquement par Next.js en cas d'erreur
- */
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Log l'erreur pour le débogage
     console.error("Erreur page channel:", error);
   }, [error]);
 

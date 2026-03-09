@@ -13,27 +13,22 @@ import { Alert } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Loader2, Send } from "lucide-react";
 
-const POLLING_INTERVAL = 5000; // 5 secondes
+const POLLING_INTERVAL = 5000;
 
 export default function ChannelPage() {
   const params = useParams();
   const channelSlug = params.slug ? params.slug.toString() : null;
   const toast = useToast();
 
-  // Hooks
   const { publications, loading, error, refetch } = usePublications({
     channelSlug,
     pollingInterval: POLLING_INTERVAL,
   });
 
-  // États pour le formulaire de création
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  /**
-   * Soumet une nouvelle publication
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -48,14 +43,11 @@ export default function ChannelPage() {
     try {
       await createPublication(channelSlug, title.trim(), body.trim());
       
-      // Réinitialiser le formulaire
       setTitle("");
       setBody("");
       
-      // Afficher un message de succès
       toast.success("Publication créée avec succès !");
       
-      // Rafraîchir les publications
       await refetch();
     } catch (err) {
       console.error("Erreur lors de la création de la publication:", err);
@@ -69,7 +61,6 @@ export default function ChannelPage() {
     }
   };
 
-  // Gestion du cas où le slug n'est pas valide
   if (!channelSlug) {
     return (
       <div className="p-6">
@@ -87,7 +78,6 @@ export default function ChannelPage() {
     );
   }
 
-  // Loading initial
   if (loading && publications.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -99,7 +89,6 @@ export default function ChannelPage() {
     );
   }
 
-  // Erreur
   if (error) {
     return (
       <div className="p-6">
@@ -119,7 +108,6 @@ export default function ChannelPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto" data-testid="channel-page">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/channels">
           <Button variant="outline" size="icon" aria-label="Retour">
@@ -138,7 +126,6 @@ export default function ChannelPage() {
         </div>
       </div>
 
-      {/* Liste des publications (ordre croissant - plus anciennes en haut) */}
       {publications.length === 0 ? (
         <Alert className="mb-6">
           <p className="text-muted-foreground">
@@ -155,7 +142,6 @@ export default function ChannelPage() {
         </div>
       )}
 
-      {/* Formulaire de création (en dessous des publications) */}
       <Card className="p-4">
         <h2 className="text-lg font-semibold mb-4">Nouvelle publication</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4" data-testid="create-publication-form">

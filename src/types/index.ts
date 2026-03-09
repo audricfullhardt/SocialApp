@@ -3,7 +3,7 @@ export interface ApiPlatformCollection<T> {
   "@id": string;
   "@type": string;
   member?: T[];
-  "hydra:member"?: T[]; // API Platform utilise parfois hydra:member
+  "hydra:member"?: T[];
   totalItems?: number;
   "hydra:totalItems"?: number;
 }
@@ -52,7 +52,7 @@ export interface Comment {
   id: number;
   publication?: string;
   author: string | Member;
-  auteur?: Member; // Alias pour author
+  auteur?: Member;
   body: string;
   createdAt: string;
   updatedAt: string;
@@ -67,7 +67,7 @@ export interface Publication {
   id?: number;
   workspace?: Record<string, unknown>;
   author?: string | Member;
-  auteur?: Member; // Alias pour author
+  auteur?: Member;
   channel?: Channel | string;
   title: string;
   body: string;
@@ -76,4 +76,17 @@ export interface Publication {
   comments?: Comment[];
   reactions?: Reaction[];
   media?: Media[];
+}
+
+export interface User {
+  id: number;
+  displayName: string;
+  prenom: string;
+  nom: string;
+  email: string;
+  dateAnniversaire?: string;
+  avatar?: Media;
+  username?: string;
+  createdAt: string;
+  password?: string;
 }

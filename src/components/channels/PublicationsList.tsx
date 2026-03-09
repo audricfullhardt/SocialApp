@@ -1,10 +1,10 @@
 "use client";
 
-import { Publication, Reaction, ApiPlatformCollection } from "@/types";
+import { Publication, Reaction, Comment, ApiPlatformCollection } from "@/types";
 import PublicationCard from "@/components/Publication";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "antd";
-import { getReactions } from "@/services/api";
+import { getReactions, getAllComments } from "@/services/api";
 import { useEffect, useState, useMemo } from "react";
 
 interface PublicationsListProps {
@@ -19,6 +19,7 @@ export function PublicationsList({
   error,
 }: PublicationsListProps) {
   const [reactions, setReactions] = useState<any>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loadingReactions, setLoadingReactions] = useState(true);
   
   const fetchReactions = async () => {
@@ -31,13 +32,27 @@ export function PublicationsList({
       setLoadingReactions(false);
     }
   };
+
+  const fetchComments = async () => {
+    try {
+      const allComments = await getAllComments();
+      setComments(allComments);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des commentaires:", err);
+    }
+  };
   
   useEffect(() => {
     fetchReactions();
+    fetchComments();
   }, []);
   
   const handleReactionAdded = () => {
     fetchReactions();
+  };
+
+  const handleCommentAdded = () => {
+    fetchComments();
   };
   
   const publicationReactionsMap = useMemo(() => {
@@ -59,6 +74,22 @@ export function PublicationsList({
     
     return map;
   }, [reactions]);
+
+  const publicationCommentsMap = useMemo(() => {
+    const map = new Map<string, Comment[]>();
+    
+    comments.forEach((comment) => {
+      const pubId = comment.publication;
+      if (pubId) {
+        if (!map.has(pubId)) {
+          map.set(pubId, []);
+        }
+        map.get(pubId)!.push(comment);
+      }
+    });
+    
+    return map;
+  }, [comments]);
   if (error) {
     return (
       <Alert variant="destructive" data-testid="channel-error">
@@ -102,6 +133,7 @@ export function PublicationsList({
     >
       {sortedPublications.map((publication) => {
         const lastReactionType = publicationReactionsMap.get(publication["@id"]);
+        const publicationComments = publicationCommentsMap.get(publication["@id"]) || [];
         return (
           <PublicationCard 
             key={publication["@id"]} 
@@ -109,6 +141,8 @@ export function PublicationsList({
             isLiked={lastReactionType === "like"}
             isLoved={lastReactionType === "love"}
             onReactionAdded={handleReactionAdded}
+            comments={publicationComments}
+            onCommentAdded={handleCommentAdded}
           />
         );
       })}

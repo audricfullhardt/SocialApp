@@ -8,10 +8,6 @@ import React, {
   ReactNode,
 } from "react";
 
-// ============================================================================
-// Types
-// ============================================================================
-
 export type ToastType = "success" | "error" | "info" | "warning";
 
 export interface Toast {
@@ -35,29 +31,15 @@ interface ToastProviderProps {
   children: ReactNode;
 }
 
-// ============================================================================
-// Context
-// ============================================================================
-
 const ToastContext = createContext<ToastContextType | null>(null);
-
-// ============================================================================
-// Provider
-// ============================================================================
 
 export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  /**
-   * Supprime un toast
-   */
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  /**
-   * Ajoute un nouveau toast
-   */
   const addToast = useCallback(
     (message: string, type: ToastType = "info", duration: number = 5000) => {
       const id = Math.random().toString(36).substring(2, 9);
@@ -71,7 +53,6 @@ export function ToastProvider({ children }: ToastProviderProps) {
 
       setToasts((prev) => [...prev, newToast]);
 
-      // Supprimer automatiquement après la durée spécifiée
       if (duration > 0) {
         setTimeout(() => {
           removeToast(id);
@@ -81,9 +62,6 @@ export function ToastProvider({ children }: ToastProviderProps) {
     [removeToast]
   );
 
-  /**
-   * Raccourcis pour les différents types de toasts
-   */
   const success = useCallback(
     (message: string, duration?: number) => addToast(message, "success", duration),
     [addToast]
@@ -117,14 +95,6 @@ export function ToastProvider({ children }: ToastProviderProps) {
   return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
-// ============================================================================
-// Hook
-// ============================================================================
-
-/**
- * Hook pour accéder au contexte de toast
- * @throws Error si utilisé en dehors d'un ToastProvider
- */
 export function useToast(): ToastContextType {
   const context = useContext(ToastContext);
   if (!context) {

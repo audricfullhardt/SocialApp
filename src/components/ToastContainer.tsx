@@ -4,9 +4,6 @@ import { useToast } from "@/contexts/ToastContext";
 import { X, CheckCircle2, XCircle, Info, AlertTriangle } from "lucide-react";
 import { Button } from "./ui/button";
 
-/**
- * Composant pour afficher les toasts
- */
 export function ToastContainer() {
   const { toasts, removeToast } = useToast();
 
@@ -39,7 +36,6 @@ export function ToastContainer() {
           role="alert"
           data-testid={`toast-${toast.type}`}
         >
-          {/* Icône */}
           <div className="flex-shrink-0 mt-0.5">
             {toast.type === "success" && (
               <CheckCircle2 className="w-5 h-5" aria-hidden="true" />
@@ -55,10 +51,8 @@ export function ToastContainer() {
             )}
           </div>
 
-          {/* Message */}
           <div className="flex-1 text-sm font-medium">{toast.message}</div>
 
-          {/* Bouton fermer */}
           <Button
             variant="ghost"
             size="icon"

@@ -1,6 +1,3 @@
-/**
- * Barrel export pour tous les hooks personnalisés
- */
 
 export { useCurrentUser } from "./useCurrentUser";
 export { useChannels } from "./useChannels";

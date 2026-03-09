@@ -12,9 +12,6 @@ interface UseCurrentUserReturn {
   refetch: () => Promise<void>;
 }
 
-/**
- * Hook pour récupérer et gérer l'utilisateur connecté
- */
 export function useCurrentUser(): UseCurrentUserReturn {
   const { isLogin, token } = useAuth();
   const [user, setUser] = useState<Member | null>(null);
@@ -44,7 +41,6 @@ export function useCurrentUser(): UseCurrentUserReturn {
 
   useEffect(() => {
     fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogin, token]);
 
   return {
