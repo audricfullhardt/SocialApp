@@ -38,6 +38,7 @@ export default function ChannelsPage() {
         errorChannels={errorChannels}
         onCreateChannel={handleCreateChannel}
         isCreatingChannel={isCreatingChannel}
+        publicationsCount={publications?.length || 0}
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">
