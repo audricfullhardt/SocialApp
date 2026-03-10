@@ -9,17 +9,13 @@ import React, {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { Member } from "@/types";
+import { User } from "@/types";
 import { getCurrentUser } from "@/services/api";
-
-// ============================================================================
-// Types
-// ============================================================================
 
 interface AuthContextType {
   token: string | null;
   isLogin: boolean;
-  user: Member | null;
+  user: User | null;
   loading: boolean;
   error: Error | null;
   login: (newToken: string) => Promise<void>;
@@ -37,14 +33,10 @@ interface AuthProviderProps {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// ============================================================================
-// Provider
-// ============================================================================
-
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<Member | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -115,14 +107,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// ============================================================================
-// Hook
-// ============================================================================
-
-/**
- * Hook pour accéder au contexte d'authentification
- * @throws Error si utilisé en dehors d'un AuthProvider
- */
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (!context) {

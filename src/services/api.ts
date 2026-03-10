@@ -222,6 +222,22 @@ export async function createPublication(
   });
 }
 
+export async function updatePublication(publicationId: number, title: string, body: string): Promise<Publication> {
+  return fetchAPI<Publication>(`/${API_SLUG}/publications/${publicationId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      title,
+      body,
+    }),
+  });
+}
+
+export async function deletePublication(publicationId: number): Promise<void> {
+  return fetchAPI<void>(`/${API_SLUG}/publications/${publicationId}`, {
+    method: "DELETE",
+  });
+}
+
 export async function getPublicationById(
   publicationId: number,
 ): Promise<Publication> {
@@ -245,6 +261,12 @@ export async function createComment(
       publication: `/api/${API_SLUG}/publications/${publicationId}`,
       body,
     }),
+  });
+}
+
+export async function deleteComment(commentId: number): Promise<void> {
+  return fetchAPI<void>(`/${API_SLUG}/comments/${commentId}`, {
+    method: "DELETE",
   });
 }
 
@@ -283,4 +305,9 @@ export async function deleteReaction(reactionId: number): Promise<void> {
 
 export async function getReactions() {
   return fetchAPI<Reaction>(`/${API_SLUG}/reactions`);
+}
+
+export async function getUsers(): Promise<User[]> {
+  const data = await fetchAPI<ApiPlatformCollection<User>>(`/users`);
+  return data.member || data["hydra:member"] || [];
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { usePublications } from "@/hooks";
-import { useToast } from "@/contexts/ToastContext";
+import { useOrder } from "@/hooks/useOrder";
 import { createPublication } from "@/services/api";
 import PublicationCard from "@/components/Publication";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ const POLLING_INTERVAL = 5000;
 export default function ChannelPage() {
   const params = useParams();
   const channelSlug = params.slug ? params.slug.toString() : null;
-  const toast = useToast();
 
   const { publications, loading, error, refetch } = usePublications({
     channelSlug,
@@ -27,37 +26,28 @@ export default function ChannelPage() {
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const publicationOrder = useOrder<void>({
+    successMessage: "Publication créée avec succès !",
+    errorMessage: "Erreur lors de la création de la publication",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!channelSlug) return;
     if (!title.trim() || !body.trim()) {
-      toast.warning("Le titre et le contenu sont requis");
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
+    const result = await publicationOrder.execute(async () => {
       await createPublication(channelSlug, title.trim(), body.trim());
-      
+      await refetch();
+    });
+
+    if (result !== null) {
       setTitle("");
       setBody("");
-      
-      toast.success("Publication créée avec succès !");
-      
-      await refetch();
-    } catch (err) {
-      console.error("Erreur lors de la création de la publication:", err);
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors de la création de la publication"
-      );
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -149,7 +139,7 @@ export default function ChannelPage() {
             placeholder="Titre de la publication"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            disabled={isSubmitting}
+            disabled={publicationOrder.isLoading}
             required
             maxLength={200}
             aria-label="Titre"
@@ -161,7 +151,7 @@ export default function ChannelPage() {
             placeholder="Contenu de la publication..."
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            disabled={isSubmitting}
+            disabled={publicationOrder.isLoading}
             required
             maxLength={5000}
             aria-label="Contenu"
@@ -170,11 +160,11 @@ export default function ChannelPage() {
 
           <Button
             type="submit"
-            disabled={isSubmitting || !title.trim() || !body.trim()}
+            disabled={publicationOrder.isLoading || !title.trim() || !body.trim()}
             className="self-end"
             data-testid="publication-submit"
           >
-            {isSubmitting ? (
+            {publicationOrder.isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Publication...

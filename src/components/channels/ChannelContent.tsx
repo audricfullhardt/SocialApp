@@ -11,6 +11,7 @@ interface ChannelContentProps {
   error: Error | null;
   onSubmitPublication: (title: string, body: string) => Promise<void>;
   isSubmitting: boolean;
+  onPublicationDeleted?: () => void;
 }
 
 export function ChannelContent({
@@ -20,6 +21,7 @@ export function ChannelContent({
   error,
   onSubmitPublication,
   isSubmitting,
+  onPublicationDeleted,
 }: ChannelContentProps) {
   if (loading && !channel) {
     return (
@@ -62,6 +64,7 @@ export function ChannelContent({
           publications={publications}
           loading={loading}
           error={error}
+          onPublicationDeleted={onPublicationDeleted}
         />
       </div>
 

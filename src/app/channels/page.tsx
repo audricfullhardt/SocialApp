@@ -4,6 +4,7 @@ import { useChannelsPage } from "@/hooks";
 import { ChannelsSidebar, ChannelContent } from "@/components/channels";
 import { useAuth } from "@/contexts/AuthContext";
 import { redirect } from "next/navigation";
+import SearchModal from "@/components/SearchModal";
 
 export default function ChannelsPage() {
   const {
@@ -11,6 +12,9 @@ export default function ChannelsPage() {
     selectedChannel,
     selectedChannelSlug,
     publications,
+    allPublications,
+    allComments,
+    allUsers,
     loadingChannels,
     loadingPublications,
     errorChannels,
@@ -20,12 +24,13 @@ export default function ChannelsPage() {
     handleChannelSelect,
     handleSubmitPublication,
     handleCreateChannel,
+    refetchPublications,
   } = useChannelsPage();
 
   const { isLogin } = useAuth();
 
   if (!isLogin) {
-    return  redirect("/");
+    return redirect("/");
   }
 
   return (
@@ -48,8 +53,17 @@ export default function ChannelsPage() {
           error={errorPublications}
           onSubmitPublication={handleSubmitPublication}
           isSubmitting={isSubmitting}
+          onPublicationDeleted={refetchPublications}
         />
       </main>
+
+      <SearchModal
+        channels={channels}
+        publications={allPublications}
+        comments={allComments}
+        users={allUsers}
+        onSelectChannel={handleChannelSelect}
+      />
     </div>
   );
 }

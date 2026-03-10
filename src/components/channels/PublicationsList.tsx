@@ -1,35 +1,40 @@
 "use client";
 
-import { Publication, Reaction, Comment, ApiPlatformCollection } from "@/types";
+import { Publication, Reaction, Comment, User, ApiPlatformCollection } from "@/types";
 import PublicationCard from "@/components/Publication";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "antd";
-import { getReactions, getAllComments } from "@/services/api";
+import { getReactions, getAllComments, getUsers, deletePublication } from "@/services/api";
 import { useEffect, useState, useMemo } from "react";
+import { useOrder } from "@/hooks/useOrder";
 
 interface PublicationsListProps {
   publications: Publication[];
   loading: boolean;
   error: Error | null;
+  onPublicationDeleted?: () => void;
 }
 
 export function PublicationsList({
   publications,
   loading,
   error,
+  onPublicationDeleted,
 }: PublicationsListProps) {
-  const [reactions, setReactions] = useState<any>(null);
+  const [reactions, setReactions] = useState<ApiPlatformCollection<Reaction> | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loadingReactions, setLoadingReactions] = useState(true);
-  
+  const [users, setUsers] = useState<User[]>([]);
+
+  const deleteOrder = useOrder({
+    successMessage: "Publication supprimée avec succès",
+    errorMessage: "Erreur lors de la suppression de la publication",
+  });
   const fetchReactions = async () => {
     try {
       const data = await getReactions();
       setReactions(data as ApiPlatformCollection<Reaction>);
     } catch (err) {
       console.error("Erreur lors de la récupération des réactions:", err);
-    } finally {
-      setLoadingReactions(false);
     }
   };
 
@@ -41,10 +46,20 @@ export function PublicationsList({
       console.error("Erreur lors de la récupération des commentaires:", err);
     }
   };
+
+  const fetchUsers = async () => {
+    try {
+      const allUsers = await getUsers();
+      setUsers(allUsers);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des utilisateurs:", err);
+    }
+  };
   
   useEffect(() => {
     fetchReactions();
     fetchComments();
+    fetchUsers();
   }, []);
   
   const handleReactionAdded = () => {
@@ -56,19 +71,24 @@ export function PublicationsList({
   };
   
   const publicationReactionsMap = useMemo(() => {
-    const map = new Map<string, "like" | "love" | null>();
+    const map = new Map<string, { likeCount: number; loveCount: number; isLiked: boolean; isLoved: boolean }>();
     
     const reactionsData = reactions as ApiPlatformCollection<Reaction> | null;
     if (!reactionsData?.member) return map;
     
-    const sortedReactions = [...reactionsData.member].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    
-    sortedReactions.forEach((reaction) => {
+    reactionsData.member.forEach((reaction) => {
       const pubId = reaction.publication;
-      if (pubId && !map.has(pubId)) {
-        map.set(pubId, reaction.type as "like" | "love");
+      if (!pubId) return;
+
+      if (!map.has(pubId)) {
+        map.set(pubId, { likeCount: 0, loveCount: 0, isLiked: false, isLoved: false });
+      }
+      const entry = map.get(pubId)!;
+
+      if (reaction.type === "like") {
+        entry.likeCount++;
+      } else if (reaction.type === "love") {
+        entry.loveCount++;
       }
     });
     
@@ -126,23 +146,50 @@ export function PublicationsList({
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
 
+  const findUserByIRI = (iri: string | undefined): User | undefined => {
+    if (!iri) return undefined;
+    return users.find(user => user["@id"] === iri);
+  };
+
+  const handleDeletePublication = async (publicationId: string) => {
+    const id = parseInt(publicationId.split("/").pop() || "0");
+    
+    const result = await deleteOrder.execute(async () => {
+      await deletePublication(id);
+    });
+
+    if (result !== null && onPublicationDeleted) {
+      onPublicationDeleted();
+    }
+  };
   return (
     <div
       className="flex flex-col gap-4 max-w-4xl mx-auto"
       data-testid="publications-list"
     >
       {sortedPublications.map((publication) => {
-        const lastReactionType = publicationReactionsMap.get(publication["@id"]);
+        const reactionData = publicationReactionsMap.get(publication["@id"]);
         const publicationComments = publicationCommentsMap.get(publication["@id"]) || [];
+        
+        const author = typeof publication.author === "object" 
+          ? publication.author 
+          : publication.auteur || findUserByIRI(publication.author);
+        
         return (
           <PublicationCard 
             key={publication["@id"]} 
             publication={publication}
-            isLiked={lastReactionType === "like"}
-            isLoved={lastReactionType === "love"}
+            isLiked={!!reactionData?.isLiked}
+            isLoved={!!reactionData?.isLoved}
+            likeCount={reactionData?.likeCount || 0}
+            loveCount={reactionData?.loveCount || 0}
             onReactionAdded={handleReactionAdded}
             comments={publicationComments}
             onCommentAdded={handleCommentAdded}
+            author={author}
+            users={users}
+            onDeletePublication={() => handleDeletePublication(publication["@id"])}
+            onPublicationUpdated={onPublicationDeleted}
           />
         );
       })}

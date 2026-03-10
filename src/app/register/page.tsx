@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { register as apiRegister } from "@/services/api";
+import { register as apiRegister, LoginResponse } from "@/services/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Alert } from "@/components/ui/alert";
+import { useOrder } from "@/hooks/useOrder";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -14,51 +16,47 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
   
   const { login } = useAuth();
   const router = useRouter();
+
+  const registerOrder = useOrder<LoginResponse>({
+    showSuccessToast: false,
+    showErrorToast: true,
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!displayName || !email || !password || !confirmPassword) {
-      setError("Veuillez remplir tous les champs");
+      setValidationError("Veuillez remplir tous les champs");
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
+      setValidationError("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
+      setValidationError("Le mot de passe doit contenir au moins 6 caractères");
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    setValidationError(null);
 
-    try {
+    const result = await registerOrder.execute(async () => {
       await apiRegister(displayName, email, password);
       
-      // Après l'inscription réussie, on connecte l'utilisateur automatiquement
       const loginModule = await import("@/services/api");
       const loginData = await loginModule.login(email, password);
       await login(loginData.token);
-      
+      return loginData;
+    });
+
+    if (result) {
       router.push("/channels");
-    } catch (err) {
-      console.error("Erreur d'inscription:", err);
-      setError(
-        err instanceof Error 
-          ? err.message 
-          : "Erreur lors de l'inscription"
-      );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -71,9 +69,15 @@ export default function RegisterPage() {
       >
         <h1 className="text-2xl font-bold text-center">Inscription</h1>
 
-        {error && (
+        {validationError && (
           <Alert variant="destructive" data-testid="register-error">
-            {error}
+            {validationError}
+          </Alert>
+        )}
+
+        {registerOrder.isError && registerOrder.error && (
+          <Alert variant="destructive" data-testid="register-error">
+            {registerOrder.error.message}
           </Alert>
         )}
 
@@ -82,7 +86,7 @@ export default function RegisterPage() {
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          disabled={loading}
+          disabled={registerOrder.isLoading}
           required
           aria-label="Nom d'affichage"
           data-testid="register-displayname"
@@ -93,7 +97,7 @@ export default function RegisterPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
+          disabled={registerOrder.isLoading}
           required
           aria-label="Email"
           data-testid="register-email"
@@ -104,7 +108,7 @@ export default function RegisterPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          disabled={loading}
+          disabled={registerOrder.isLoading}
           required
           minLength={6}
           aria-label="Mot de passe"
@@ -116,7 +120,7 @@ export default function RegisterPage() {
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          disabled={loading}
+          disabled={registerOrder.isLoading}
           required
           minLength={6}
           aria-label="Confirmer le mot de passe"
@@ -125,10 +129,17 @@ export default function RegisterPage() {
 
         <Button 
           type="submit" 
-          disabled={loading}
+          disabled={registerOrder.isLoading}
           data-testid="register-submit"
         >
-          {loading ? "Inscription..." : "S'inscrire"}
+          {registerOrder.isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Inscription...
+            </>
+          ) : (
+            "S'inscrire"
+          )}
         </Button>
 
         <Link href="/login">

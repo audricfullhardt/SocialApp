@@ -1,16 +1,27 @@
 import { useState } from "react";
 import { useChannels, usePublications } from "@/hooks";
-import { useToast } from "@/contexts/ToastContext";
-import { createPublication, createChannel } from "@/services/api";
+import { useOrder } from "@/hooks/useOrder";
+import { createPublication, createChannel, getAllComments, getUsers } from "@/services/api";
+import { Channel, Comment, User } from "@/types";
+import { useEffect } from "react";
 
 const POLLING_INTERVAL = 5000;
 
 export function useChannelsPage() {
   const { channels, loading: loadingChannels, error: errorChannels, refetch: refetchChannels } = useChannels();
   const [selectedChannelSlug, setSelectedChannelSlug] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCreatingChannel, setIsCreatingChannel] = useState(false);
-  const toast = useToast();
+  const [allComments, setAllComments] = useState<Comment[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  
+  const publicationOrder = useOrder<void>({
+    successMessage: "Publication créée avec succès !",
+    errorMessage: "Erreur lors de la création de la publication",
+  });
+
+  const channelOrder = useOrder<Channel>({
+    showSuccessToast: true,
+    showErrorToast: true,
+  });
 
   const {
     publications,
@@ -24,53 +35,53 @@ export function useChannelsPage() {
 
   const selectedChannel = channels.find((c) => c.slug === selectedChannelSlug);
 
+  const allPublications = channels.flatMap((c) => c.publications || []);
+
+  useEffect(() => {
+    const fetchSearchData = async () => {
+      try {
+        const [commentsData, usersData] = await Promise.all([
+          getAllComments(),
+          getUsers(),
+        ]);
+        setAllComments(commentsData);
+        setAllUsers(usersData);
+      } catch {
+        // silently fail for search data
+      }
+    };
+    fetchSearchData();
+  }, []);
+
   const handleChannelSelect = (slug: string) => {
     setSelectedChannelSlug((current) => (current === slug ? null : slug));
   };
 
   const handleSubmitPublication = async (title: string, body: string) => {
     if (!selectedChannelSlug) {
-      toast.warning("Aucun channel sélectionné");
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
+    await publicationOrder.execute(async () => {
       await createPublication(selectedChannelSlug, title, body);
-      toast.success("Publication créée avec succès !");
       await refetch();
-    } catch (err) {
-      console.error("Erreur lors de la création de la publication:", err);
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors de la création de la publication"
-      );
-      throw err;
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const handleCreateChannel = async (name: string, slug: string) => {
-    setIsCreatingChannel(true);
+    const result = await channelOrder.execute(
+      async () => {
+        const newChannel = await createChannel(name, slug);
+        await refetchChannels();
+        return newChannel;
+      },
+      {
+        successMessage: `Channel "${name}" créé avec succès !`,
+      }
+    );
 
-    try {
-      const newChannel = await createChannel(name, slug);
-      toast.success(`Channel "${name}" créé avec succès !`);
-      await refetchChannels();
-      setSelectedChannelSlug(newChannel.slug);
-    } catch (err) {
-      console.error("Erreur lors de la création du channel:", err);
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Erreur lors de la création du channel"
-      );
-      throw err;
-    } finally {
-      setIsCreatingChannel(false);
+    if (result) {
+      setSelectedChannelSlug(result.slug);
     }
   };
 
@@ -79,14 +90,18 @@ export function useChannelsPage() {
     selectedChannel,
     selectedChannelSlug,
     publications,
+    allPublications,
+    allComments,
+    allUsers,
     loadingChannels,
     loadingPublications,
     errorChannels,
     errorPublications,
-    isSubmitting,
-    isCreatingChannel,
+    isSubmitting: publicationOrder.isLoading,
+    isCreatingChannel: channelOrder.isLoading,
     handleChannelSelect,
     handleSubmitPublication,
     handleCreateChannel,
+    refetchPublications: refetch,
   };
 }

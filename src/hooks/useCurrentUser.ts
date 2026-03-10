@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { getCurrentUser } from "@/services/api";
-import { Member } from "@/types";
+import { User } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface UseCurrentUserReturn {
-  user: Member | null;
+  user: User | null;
   loading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
@@ -14,7 +14,7 @@ interface UseCurrentUserReturn {
 
 export function useCurrentUser(): UseCurrentUserReturn {
   const { isLogin, token } = useAuth();
-  const [user, setUser] = useState<Member | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 

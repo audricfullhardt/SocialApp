@@ -79,6 +79,8 @@ export interface Publication {
 }
 
 export interface User {
+  "@id"?: string;
+  "@type"?: string;
   id: number;
   displayName: string;
   prenom: string;

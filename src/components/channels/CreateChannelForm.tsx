@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -119,7 +119,14 @@ export function CreateChannelForm({ onSubmit, isSubmitting }: CreateChannelFormP
           disabled={isSubmitting || !name.trim() || !slug.trim()}
           className="flex-1"
         >
-          {isSubmitting ? "Création..." : "Créer"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Création...
+            </>
+          ) : (
+            "Créer"
+          )}
         </Button>
         <Button
           type="button"
