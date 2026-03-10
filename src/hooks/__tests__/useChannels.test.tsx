@@ -1,9 +1,8 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import { useChannels } from "../useChannels";
 import * as api from "@/services/api";
 import { Channel } from "@/types";
 
-// Mock du service API
 jest.mock("@/services/api");
 
 const mockedApi = api as jest.Mocked<typeof api>;
@@ -23,12 +22,10 @@ describe("useChannels", () => {
 
     const { result } = renderHook(() => useChannels());
 
-    // État initial
     expect(result.current.loading).toBe(true);
     expect(result.current.channels).toEqual([]);
     expect(result.current.error).toBeNull();
 
-    // Attendre que les channels soient chargés
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -61,15 +58,15 @@ describe("useChannels", () => {
 
     const { result } = renderHook(() => useChannels());
 
-    // Attendre le chargement initial
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
     expect(mockedApi.getChannels).toHaveBeenCalledTimes(1);
 
-    // Rafraîchir
-    await result.current.refetch();
+    await act(async () => {
+      await result.current.refetch();
+    });
 
     expect(mockedApi.getChannels).toHaveBeenCalledTimes(2);
   });
