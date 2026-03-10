@@ -109,6 +109,10 @@ async function fetchAPI<T>(
       }
     }
 
+    if (response.status === 204 || response.headers.get("content-length") === "0") {
+      return undefined as T;
+    }
+
     return await response.json();
   } catch (error) {
     if (error instanceof ApiError) {
@@ -167,13 +171,21 @@ export async function getCurrentUser(): Promise<User> {
 }
 
 export async function updateUser(user: User): Promise<User> {
-  return fetchAPI<User>(`/${API_SLUG}/users/${user.id}`, {
-    method: "PUT",
-    body: JSON.stringify({
-      displayName: user.displayName,
-      email: user.email,
-      password: user.password,
-    }),
+  const payload: Record<string, string> = {
+    displayName: user.displayName,
+    email: user.email,
+  };
+
+  if (user.password) {
+    payload.password = user.password;
+  }
+
+  return fetchAPI<User>(`/users/${user.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/merge-patch+json",
+    },
+    body: JSON.stringify(payload),
   });
 }
 
@@ -225,6 +237,9 @@ export async function createPublication(
 export async function updatePublication(publicationId: number, title: string, body: string): Promise<Publication> {
   return fetchAPI<Publication>(`/${API_SLUG}/publications/${publicationId}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/merge-patch+json",
+    },
     body: JSON.stringify({
       title,
       body,

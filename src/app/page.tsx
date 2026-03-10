@@ -91,7 +91,7 @@ export default function Home() {
             <Card className="p-6 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-4">
                 <Shield className="w-6 h-6 text-purple-500" />
-              </div>@
+              </div>
               <h3 className="font-semibold text-lg mb-2">Sécurisé</h3>
               <p className="text-sm text-muted-foreground">
                 Authentification JWT et protection des routes pour vos données.

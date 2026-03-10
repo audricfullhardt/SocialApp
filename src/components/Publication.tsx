@@ -297,34 +297,9 @@ export default function PublicationCard({
 
   return (
     <Card
-      className="p-3 hover:bg-accent/50 transition-colors relative group"
+      className="p-3 hover:bg-accent/50 transition-colors group"
       data-testid={`publication-${publication["@id"]}`}
     >
-      {isAuthor && (
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {!isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleStartEdit}
-              aria-label="Modifier la publication"
-              className="h-8 w-8 p-0"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onDeletePublication}
-            aria-label="Supprimer la publication"
-            data-testid={`delete-publication-${publication["@id"]}`}
-            className="h-8 w-8 p-0 hover:text-destructive"
-          >
-            <Trash className="w-3.5 h-3.5" />
-          </Button>
-        </div>
-      )}
       <div className="flex gap-3">
         <Avatar className="w-10 h-10 flex-shrink-0">
           <AvatarImage
@@ -337,8 +312,8 @@ export default function PublicationCard({
             {author?.displayName ? getInitials(author.displayName) : "??"}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0 pr-8">
-          <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
             <p className="font-semibold text-sm truncate">
               {author?.displayName || "Utilisateur inconnu"}
             </p>
@@ -348,6 +323,31 @@ export default function PublicationCard({
             >
               {formatDate(publication.createdAt)}
             </p>
+            {isAuthor && (
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto flex-shrink-0">
+                {!isEditing && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleStartEdit}
+                    aria-label="Modifier la publication"
+                    className="h-7 w-7 p-0"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onDeletePublication}
+                  aria-label="Supprimer la publication"
+                  data-testid={`delete-publication-${publication["@id"]}`}
+                  className="h-7 w-7 p-0 hover:text-destructive"
+                >
+                  <Trash className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            )}
           </div>
 
           {isEditing ? (
