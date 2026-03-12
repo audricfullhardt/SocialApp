@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { ToastContainer } from "@/components/ToastContainer";
+import ProductTour from "@/components/ProductTour";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
             <AuthProvider>
               <Navbar />
               {children}
+              <ProductTour />
               <ToastContainer />
             </AuthProvider>
           </ToastProvider>

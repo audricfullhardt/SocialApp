@@ -120,3 +120,103 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Product Tour — match shadcn/ui design system */
+.ant-tour {
+  --antd-arrow-background-color: var(--card);
+}
+
+.ant-tour .ant-tour-inner {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 1.25rem;
+}
+
+.dark .ant-tour .ant-tour-inner {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.ant-tour .ant-tour-title {
+  color: var(--card-foreground);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.ant-tour .ant-tour-description {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.625;
+}
+
+.ant-tour .ant-tour-close {
+  color: var(--muted-foreground);
+  transition: color 0.15s;
+}
+
+.ant-tour .ant-tour-close:hover {
+  color: var(--card-foreground);
+}
+
+.ant-tour .ant-tour-buttons .ant-btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: calc(var(--radius) - 4px);
+  font-weight: 500;
+  font-size: 0.875rem;
+  height: 2rem;
+  padding: 0 0.875rem;
+  box-shadow: none;
+  transition: opacity 0.15s;
+}
+
+.ant-tour .ant-tour-buttons .ant-btn-primary:hover {
+  background: var(--primary) !important;
+  opacity: 0.9;
+}
+
+.ant-tour .ant-tour-buttons .ant-btn-default {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  font-weight: 500;
+  font-size: 0.875rem;
+  height: 2rem;
+  padding: 0 0.875rem;
+  box-shadow: none;
+  transition: background 0.15s;
+}
+
+.ant-tour .ant-tour-buttons .ant-btn-default:hover {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.ant-tour .ant-tour-indicators .ant-tour-indicator {
+  background: var(--border);
+  width: 6px;
+  height: 6px;
+}
+
+.ant-tour .ant-tour-indicators .ant-tour-indicator-active {
+  background: var(--primary);
+}
+
+.ant-tour .ant-tour-arrow::before,
+.ant-tour .ant-tour-arrow::after {
+  background: var(--card);
+}
+
+.ant-tour-mask {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.dark .ant-tour-mask {
+  color: rgba(0, 0, 0, 0.7);
+}

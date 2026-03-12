@@ -21,7 +21,7 @@ export default function Home() {
     <div className="min-h-screen">
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 data-tour="hero-title" className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Mini Réseau Social
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -34,7 +34,7 @@ export default function Home() {
               <p className="text-lg">
                 Bienvenue, <span className="font-semibold">{user.displayName}</span> !
               </p>
-              <Link href="/channels">
+              <Link href="/channels" data-tour="cta-channels">
                 <Button size="lg" className="gap-2">
                   <MessageSquare className="w-5 h-5" />
                   Accéder aux channels
@@ -57,7 +57,7 @@ export default function Home() {
             Pourquoi utiliser notre plateforme ?
           </h2>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div data-tour="features" className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="p-6 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <MessageSquare className="w-6 h-6 text-primary" />

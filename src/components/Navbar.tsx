@@ -37,13 +37,14 @@ export default function Navbar() {
 
   return (
     <nav className="w-full h-16 flex items-center justify-between px-6">
-      <Link href="/">
+      <Link href="/" data-tour="logo">
         <span className="font-bold text-xl">Mini réseau social</span>
       </Link>
       <div className="flex items-center gap-4">
         {isLogin && (
           <button
             onClick={handleSearchClick}
+            data-tour="search"
             className="flex items-center gap-2 px-3 py-1.5 rounded-md border text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
             <Search className="w-4 h-4" />
@@ -56,7 +57,7 @@ export default function Navbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="outline">
+            <Button size="icon" variant="outline" data-tour="theme">
               {renderIcon()}
             </Button>
           </DropdownMenuTrigger>
@@ -73,10 +74,10 @@ export default function Navbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {isLogin && <Link href="/channels">Channels</Link>}
+        {isLogin && <Link href="/channels" data-tour="channels-link">Channels</Link>}
 
         {isLogin ? (
-          <Link href="/profile">
+          <Link href="/profile" data-tour="profile">
             <User />
           </Link>
         ) : (
