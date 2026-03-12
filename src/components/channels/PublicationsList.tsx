@@ -72,6 +72,10 @@ export function PublicationsList({
     fetchUsers();
     fetchMedia();
   }, []);
+
+  useEffect(() => {
+    fetchMedia();
+  }, [publications]);
   
   const handleReactionAdded = () => {
     fetchReactions();
