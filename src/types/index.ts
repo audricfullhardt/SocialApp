@@ -28,10 +28,14 @@ export interface Media {
   "@context"?: string;
   "@id"?: string;
   "@type"?: string;
+  id?: number;
   originalName: string;
   mimeType: string;
   size: number;
   path: string;
+  createdAt?: string;
+  publication?: string;
+  comment?: string;
 }
 
 export interface Reaction {

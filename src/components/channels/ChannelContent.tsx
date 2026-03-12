@@ -9,7 +9,7 @@ interface ChannelContentProps {
   publications: Publication[];
   loading: boolean;
   error: Error | null;
-  onSubmitPublication: (title: string, body: string) => Promise<void>;
+  onSubmitPublication: (title: string, body: string, file?: File) => Promise<void>;
   isSubmitting: boolean;
   onPublicationDeleted?: () => void;
 }

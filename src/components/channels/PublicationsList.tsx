@@ -1,10 +1,10 @@
 "use client";
 
-import { Publication, Reaction, Comment, User, ApiPlatformCollection } from "@/types";
+import { Publication, Reaction, Comment, User, Media, ApiPlatformCollection } from "@/types";
 import PublicationCard from "@/components/Publication";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "antd";
-import { getReactions, getAllComments, getUsers, deletePublication } from "@/services/api";
+import { getReactions, getAllComments, getUsers, getMedia, deletePublication } from "@/services/api";
 import { useEffect, useState, useMemo } from "react";
 import { useOrder } from "@/hooks/useOrder";
 
@@ -24,6 +24,7 @@ export function PublicationsList({
   const [reactions, setReactions] = useState<ApiPlatformCollection<Reaction> | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [mediaList, setMediaList] = useState<Media[]>([]);
 
   const deleteOrder = useOrder({
     successMessage: "Publication supprimée avec succès",
@@ -55,11 +56,21 @@ export function PublicationsList({
       console.error("Erreur lors de la récupération des utilisateurs:", err);
     }
   };
+
+  const fetchMedia = async () => {
+    try {
+      const allMedia = await getMedia();
+      setMediaList(allMedia);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des médias:", err);
+    }
+  };
   
   useEffect(() => {
     fetchReactions();
     fetchComments();
     fetchUsers();
+    fetchMedia();
   }, []);
   
   const handleReactionAdded = () => {
@@ -68,6 +79,10 @@ export function PublicationsList({
 
   const handleCommentAdded = () => {
     fetchComments();
+  };
+
+  const handleMediaAdded = () => {
+    fetchMedia();
   };
   
   const publicationReactionsMap = useMemo(() => {
@@ -110,6 +125,23 @@ export function PublicationsList({
     
     return map;
   }, [comments]);
+
+  const publicationMediaMap = useMemo(() => {
+    const map = new Map<string, Media[]>();
+
+    mediaList.forEach((media) => {
+      const pubIri = media.publication;
+      if (pubIri) {
+        if (!map.has(pubIri)) {
+          map.set(pubIri, []);
+        }
+        map.get(pubIri)!.push(media);
+      }
+    });
+
+    return map;
+  }, [mediaList]);
+
   if (error) {
     return (
       <Alert variant="destructive" data-testid="channel-error">
@@ -170,6 +202,7 @@ export function PublicationsList({
       {sortedPublications.map((publication) => {
         const reactionData = publicationReactionsMap.get(publication["@id"]);
         const publicationComments = publicationCommentsMap.get(publication["@id"]) || [];
+        const publicationMedia = publicationMediaMap.get(publication["@id"]) || [];
         
         const author = typeof publication.author === "object" 
           ? publication.author 
@@ -186,6 +219,8 @@ export function PublicationsList({
             onReactionAdded={handleReactionAdded}
             comments={publicationComments}
             onCommentAdded={handleCommentAdded}
+            media={publicationMedia}
+            onMediaAdded={handleMediaAdded}
             author={author}
             users={users}
             onDeletePublication={() => handleDeletePublication(publication["@id"])}

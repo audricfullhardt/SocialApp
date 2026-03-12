@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useChannels, usePublications } from "@/hooks";
 import { useOrder } from "@/hooks/useOrder";
-import { createPublication, createChannel, getAllComments, getUsers } from "@/services/api";
+import { createPublication, createChannel, getAllComments, getUsers, uploadMedia } from "@/services/api";
 import { Channel, Comment, User } from "@/types";
 import { useEffect } from "react";
 
@@ -57,13 +57,16 @@ export function useChannelsPage() {
     setSelectedChannelSlug((current) => (current === slug ? null : slug));
   };
 
-  const handleSubmitPublication = async (title: string, body: string) => {
+  const handleSubmitPublication = async (title: string, body: string, file?: File) => {
     if (!selectedChannelSlug) {
       return;
     }
 
     await publicationOrder.execute(async () => {
-      await createPublication(selectedChannelSlug, title, body);
+      const publication = await createPublication(selectedChannelSlug, title, body);
+      if (file && publication["@id"]) {
+        await uploadMedia(file, publication["@id"]);
+      }
       await refetch();
     });
   };

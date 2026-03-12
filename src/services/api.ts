@@ -4,6 +4,7 @@ import {
   Comment,
   ApiPlatformCollection,
   Member,
+  Media,
   Reaction,
   User,
 } from "../types";
@@ -324,5 +325,54 @@ export async function getReactions() {
 
 export async function getUsers(): Promise<User[]> {
   const data = await fetchAPI<ApiPlatformCollection<User>>(`/users`);
+  return data.member || data["hydra:member"] || [];
+}
+
+export async function uploadMedia(
+  file: File,
+  publicationIri?: string,
+): Promise<Media> {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (publicationIri) {
+    formData.append("publication", publicationIri);
+  }
+
+  const token = getAuthToken();
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/${API_SLUG}/media`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Erreur ${response.status}: ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch {}
+
+    switch (response.status) {
+      case 401:
+        throw new UnauthorizedError(errorMessage);
+      case 403:
+        throw new ForbiddenError(errorMessage);
+      case 404:
+        throw new NotFoundError(errorMessage);
+      default:
+        throw new ApiError(response.status, response.statusText, errorMessage);
+    }
+  }
+
+  return response.json();
+}
+
+export async function getMedia(): Promise<Media[]> {
+  const data = await fetchAPI<ApiPlatformCollection<Media>>(`/${API_SLUG}/media`);
   return data.member || data["hydra:member"] || [];
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, KeyboardEvent, useEffect } from "react";
-import { Comment, Publication as PublicationType, User } from "@/types";
+import { Comment, Media, Publication as PublicationType, User } from "@/types";
 import { useOrder } from "@/hooks/useOrder";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -22,6 +22,7 @@ import {
   Pencil,
   Check,
   X,
+  FileIcon,
 } from "lucide-react";
 
 interface PublicationCardProps {
@@ -30,11 +31,13 @@ interface PublicationCardProps {
   onReactionAdded?: () => void;
   onCommentAdded?: () => void;
   onPublicationUpdated?: () => void;
+  onMediaAdded?: () => void;
   isLiked?: boolean;
   isLoved?: boolean;
   likeCount?: number;
   loveCount?: number;
   comments?: Comment[];
+  media?: Media[];
   author?: User | { displayName: string; avatar?: string; id?: number } | null;
   users?: User[];
 }
@@ -50,6 +53,7 @@ export default function PublicationCard({
   likeCount = 0,
   loveCount = 0,
   comments: initialComments = [],
+  media: publicationMedia = [],
   author = null,
   users = [],
 }: PublicationCardProps) {
@@ -409,6 +413,65 @@ export default function PublicationCard({
               <p className="text-sm whitespace-pre-wrap break-words text-muted-foreground">
                 {publication.body}
               </p>
+
+              {publicationMedia.length > 0 && (
+                <div className="mt-2 flex flex-col gap-2">
+                  {publicationMedia.map((media, idx) => {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+                    const apiSlug = process.env.NEXT_PUBLIC_API_SLUG || "";
+                    const baseUrl = apiUrl.replace(/\/api\/?$/, "");
+                    const mediaUrl = media.path.startsWith("http")
+                      ? media.path
+                      : `${baseUrl}/uploads/${apiSlug}/${media.path}`;
+
+                    if (media.mimeType.startsWith("image/")) {
+                      return (
+                        <a
+                          key={media.id ?? idx}
+                          href={mediaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={mediaUrl}
+                            alt={media.originalName}
+                            className="max-w-full max-h-96 rounded-lg border object-contain"
+                          />
+                        </a>
+                      );
+                    }
+
+                    if (media.mimeType.startsWith("video/")) {
+                      return (
+                        <video
+                          key={media.id ?? idx}
+                          src={mediaUrl}
+                          controls
+                          className="max-w-full max-h-96 rounded-lg border"
+                        >
+                          Votre navigateur ne supporte pas la lecture vidéo.
+                        </video>
+                      );
+                    }
+
+                    return (
+                      <a
+                        key={media.id ?? idx}
+                        href={mediaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 p-2 rounded-md border bg-muted/50 hover:bg-muted transition-colors w-fit"
+                      >
+                        <FileIcon className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm">{media.originalName}</span>
+                        <span className="text-xs text-muted-foreground">
+                          ({(media.size / 1024).toFixed(1)} Ko)
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
