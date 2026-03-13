@@ -85,7 +85,7 @@ export function PublicationForm({
   };
 
   return (
-    <div className="border-t bg-background p-4">
+    <div className="border-t bg-background p-2 sm:p-4">
       <div className="max-w-4xl mx-auto">
         <Card className="p-4">
           <form
@@ -182,12 +182,12 @@ export function PublicationForm({
                   ) : (
                     <Paperclip className="w-4 h-4" />
                   )}
-                  <span className="text-xs">
+                  <span className="text-xs hidden sm:inline">
                     {selectedFile ? "Changer le média" : "Ajouter un média"}
                   </span>
                 </Button>
               </div>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 Ctrl+Entrée pour publier
               </span>
             </div>

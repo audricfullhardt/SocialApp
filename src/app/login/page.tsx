@@ -96,9 +96,9 @@ export default function LoginPage() {
 
   if (showResetPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <form
-          className="flex flex-col gap-4 p-6 border rounded shadow-md w-full max-w-sm"
+          className="flex flex-col gap-4 p-5 sm:p-6 border rounded shadow-md w-full max-w-sm"
           onSubmit={handleResetPassword}
         >
           <div className="flex items-center gap-2">
@@ -175,9 +175,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <form
-        className="flex flex-col gap-4 p-6 border rounded shadow-md w-full max-w-sm"
+        className="flex flex-col gap-4 p-5 sm:p-6 border rounded shadow-md w-full max-w-sm"
         onSubmit={handleSubmit}
         data-testid="login-form"
       >

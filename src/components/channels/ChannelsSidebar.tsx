@@ -1,6 +1,6 @@
 import { Channel } from "@/types";
 import { Badge, Skeleton } from "antd";
-import { Hash } from "lucide-react";
+import { Hash, X } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { CreateChannelForm } from "./CreateChannelForm";
 
@@ -12,6 +12,8 @@ interface ChannelsSidebarProps {
   errorChannels?: Error | null;
   onCreateChannel: (name: string, slug: string) => Promise<void>;
   isCreatingChannel: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export function ChannelsSidebar({
@@ -22,11 +24,31 @@ export function ChannelsSidebar({
   errorChannels,
   onCreateChannel,
   isCreatingChannel,
+  mobileOpen = false,
+  onMobileClose,
 }: ChannelsSidebarProps) {
   return (
-    <aside className="w-64 border-r bg-muted/10 overflow-y-auto flex flex-col">
+    <aside
+      className={`
+        fixed inset-y-0 left-0 top-16 z-40 w-72 border-r bg-background overflow-y-auto flex flex-col
+        transition-transform duration-200 ease-in-out
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        md:static md:translate-x-0 md:w-64 md:bg-muted/10
+      `}
+    >
       <div className="p-4 flex-1">
-        <h2 className="text-lg font-bold mb-4">Channels</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">Channels</h2>
+          {onMobileClose && (
+            <button
+              onClick={onMobileClose}
+              className="md:hidden p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              aria-label="Fermer la sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
         <nav className="flex flex-col gap-1">
           {loadingChannels ? (
             <Skeleton active />

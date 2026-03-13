@@ -19,12 +19,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <section className="py-20 px-6">
+      <section className="py-12 sm:py-20 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 data-tour="hero-title" className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 data-tour="hero-title" className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             Mini Réseau Social
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
             Connectez-vous avec votre équipe, partagez des idées et collaborez en temps réel.
             Un espace moderne et intuitif pour échanger.
           </p>
@@ -51,14 +51,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 px-6 bg-accent/30">
+      <section className="py-10 sm:py-16 px-4 sm:px-6 bg-accent/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">
             Pourquoi utiliser notre plateforme ?
           </h2>
 
-          <div data-tour="features" className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="p-6 hover:shadow-lg transition-shadow">
+          <div data-tour="features" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <Card className="p-5 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <MessageSquare className="w-6 h-6 text-primary" />
               </div>
@@ -68,7 +68,7 @@ export default function Home() {
               </p>
             </Card>
 
-            <Card className="p-6 hover:shadow-lg transition-shadow">
+            <Card className="p-5 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-blue-500" />
               </div>
@@ -78,7 +78,7 @@ export default function Home() {
               </p>
             </Card>
 
-            <Card className="p-6 hover:shadow-lg transition-shadow">
+            <Card className="p-5 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-green-500" />
               </div>
@@ -88,7 +88,7 @@ export default function Home() {
               </p>
             </Card>
 
-            <Card className="p-6 hover:shadow-lg transition-shadow">
+            <Card className="p-5 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-4">
                 <Shield className="w-6 h-6 text-purple-500" />
               </div>
@@ -102,12 +102,12 @@ export default function Home() {
       </section>
 
       {!isLogin && (
-        <section className="py-20 px-6">
+        <section className="py-12 sm:py-20 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Prêt à commencer ?
             </h2>
-            <p className="text-muted-foreground mb-8">
+            <p className="text-muted-foreground mb-6 sm:mb-8">
               Rejoignez notre communauté et commencez à échanger dès maintenant.
             </p>
             <Link href="/login">

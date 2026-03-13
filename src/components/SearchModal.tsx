@@ -248,7 +248,7 @@ export default function SearchModal({
         className="fixed inset-0 bg-background/80 backdrop-blur-sm"
         onClick={() => setIsOpen(false)}
       />
-      <div className="fixed top-[15%] left-1/2 -translate-x-1/2 w-full max-w-2xl">
+      <div className="fixed top-4 sm:top-[15%] left-2 right-2 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 w-auto sm:w-full sm:max-w-2xl">
         <div className="bg-background border rounded-xl shadow-2xl overflow-hidden">
           <div className="flex items-center gap-3 px-4 py-3 border-b">
             <Search className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -353,7 +353,7 @@ export default function SearchModal({
           </div>
 
           <div className="flex items-center justify-between px-4 py-2 border-t text-[10px] text-muted-foreground">
-            <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-3">
               <span>
                 <kbd className="rounded border bg-muted px-1 py-0.5 font-mono">
                   ↑↓

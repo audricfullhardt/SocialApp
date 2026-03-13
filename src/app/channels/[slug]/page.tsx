@@ -97,15 +97,15 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto" data-testid="channel-page">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="p-3 sm:p-6 max-w-4xl mx-auto" data-testid="channel-page">
+      <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
         <Link href="/channels">
           <Button variant="outline" size="icon" aria-label="Retour">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
             {(publications[0]?.channel && typeof publications[0].channel === 'object' 
               ? publications[0].channel.name 
               : null) || `Channel #${channelSlug}`}
@@ -123,7 +123,7 @@ export default function ChannelPage() {
           </p>
         </Alert>
       ) : (
-        <div className="flex flex-col gap-4 mb-6" data-testid="publications-list">
+        <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6" data-testid="publications-list">
           {publications
             .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
             .map((publication) => (

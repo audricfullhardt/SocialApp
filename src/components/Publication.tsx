@@ -328,7 +328,7 @@ export default function PublicationCard({
               {formatDate(publication.createdAt)}
             </p>
             {isAuthor && (
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto flex-shrink-0">
+              <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ml-auto flex-shrink-0">
                 {!isEditing && (
                   <Button
                     variant="ghost"
@@ -400,7 +400,7 @@ export default function PublicationCard({
                   <X className="w-3.5 h-3.5" />
                   Annuler
                 </Button>
-                <span className="text-xs text-muted-foreground ml-auto">
+                <span className="text-xs text-muted-foreground ml-auto hidden sm:inline">
                   Ctrl+Entrée pour sauvegarder, Échap pour annuler
                 </span>
               </div>
@@ -475,7 +475,7 @@ export default function PublicationCard({
             </div>
           )}
 
-          <div className="flex items-center gap-1 pt-2 border-t">
+          <div className="flex flex-wrap items-center gap-1 pt-2 border-t">
             <Button
               variant="ghost"
               size="sm"

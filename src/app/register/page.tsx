@@ -61,9 +61,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <form
-        className="flex flex-col gap-4 p-6 border rounded shadow-md w-full max-w-sm"
+        className="flex flex-col gap-4 p-5 sm:p-6 border rounded shadow-md w-full max-w-sm"
         onSubmit={handleSubmit}
         data-testid="register-form"
       >
