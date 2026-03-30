@@ -22,16 +22,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build static site
+      - name: Build
         run: npm run build
 
-      - name: Deploy to server
-        uses: burnett01/rsync-deployments@7.0.1
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          switches: -avz --delete
-          path: out/
-          remote_path: /var/www/social-app
-          remote_host: ${{ secrets.SSH_HOST }}
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_KEY }}
-          remote_port: 22
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/social-app
+            git pull origin main
+            npm ci --omit=dev
+            npm run build
+            pm2 restart social-app || pm2 start npm --name "social-app" -- start
